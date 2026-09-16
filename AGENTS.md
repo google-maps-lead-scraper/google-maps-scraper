@@ -18,6 +18,9 @@ pip install google-maps-scraper-sdk
 
 npm install @gmapsleadfinder/google-maps-scraper
 # import: import { Client } from "@gmapsleadfinder/google-maps-scraper"
+
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+# import: gmaps "github.com/google-maps-lead-scraper/google-maps-scraper/go"
 ```
 
 ## Prefer MCP vs HTTP
@@ -25,7 +28,7 @@ npm install @gmapsleadfinder/google-maps-scraper
 | Situation | Use |
 |-----------|-----|
 | User is in Claude / Cursor / Codex with MCP support | **Remote MCP** at `https://gmapsleadfinder.com/mcp` |
-| Scripts, CI, custom apps | **HTTP** via Python/TS SDK or raw `fetch`/`curl` |
+| Scripts, CI, custom apps | **HTTP** via Python/TS/Go SDK or raw `fetch`/`curl` |
 
 MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`.
 
@@ -42,7 +45,7 @@ MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gma
 3. Poll `GET /api/v1/jobs/{id}` until `completed`, `partial`, or `failed`.
 4. `GET /api/v1/jobs/{id}/results?limit=100` and follow `nextCursor` until `null`.
 
-Or use SDK helpers: `Client.scrape(keyword)` (Python / TypeScript) which polls and paginates.
+Or use SDK helpers: `scrape` / `Scrape` (Python / TypeScript / Go) which polls and paginates.
 
 ## Hard constraints
 
@@ -61,10 +64,11 @@ Rows are objects keyed by export column headers, e.g. `Name`, `Phone`, `Website`
 - Agent & MCP: https://gmapsleadfinder.com/docs/agent
 - OpenAPI: https://gmapsleadfinder.com/openapi-agent.yaml (repo copy: `openapi/agent.yaml`)
 - Pricing: https://gmapsleadfinder.com/pricing
-- Repo guides: `docs/getting-api-key.md`, `docs/http-api.md`, `docs/mcp.md`, `docs/python.md`, `docs/typescript.md`
+- Repo guides: `docs/getting-api-key.md`, `docs/http-api.md`, `docs/mcp.md`, `docs/python.md`, `docs/typescript.md`, `go/README.md`
 
 ## When editing this repo
 
-- Keep Python and TypeScript public APIs aligned.
+- Keep Python, TypeScript, and Go public APIs aligned.
 - Do not add Playwright/Selenium scrapers or auth bypasses.
 - Update examples and docs together when changing client surfaces.
+- Go releases use Git tags `go/vX.Y.Z` (see `docs/publishing.md`).

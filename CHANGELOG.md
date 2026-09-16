@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.1] - 2026-09-16
 
+### Added
+
+- Go SDK module `github.com/google-maps-lead-scraper/google-maps-scraper/go` (tag `go/v0.1.1` for pkg.go.dev)
+
 ### Changed
 
 - Expanded SEO package READMEs and added README hero image

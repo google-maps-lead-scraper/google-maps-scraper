@@ -7,10 +7,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@gmapsleadfinder/google-maps-scraper.svg)](https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper)
 [![PyPI](https://img.shields.io/pypi/v/google-maps-scraper-sdk.svg)](https://pypi.org/project/google-maps-scraper-sdk/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/google-maps-lead-scraper/google-maps-scraper/go.svg)](https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg)](python/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](typescript/)
+[![Go 1.22+](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](go/)
 
-Official open-source **Python + TypeScript** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
+Official open-source **Python + TypeScript + Go** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
 
 This repo does **not** run a local browser crawler. It calls the same cloud scrape-and-enrich pipeline as the Online Lead Extractor.
 
@@ -61,7 +63,25 @@ const rows = await client.scrape("dentists in Austin TX");
 console.log(rows.length, rows[0]);
 ```
 
-> Both packages ship a CLI named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` if you install both globally.
+### Go
+
+```bash
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+```
+
+```go
+import gmaps "github.com/google-maps-lead-scraper/google-maps-scraper/go"
+
+client, _ := gmaps.NewClient(nil) // reads GMF_API_KEY
+rows, _ := client.Scrape("dentists in Austin TX", nil)
+fmt.Println(len(rows), rows[0])
+```
+
+```bash
+cd go && go run ./cli scrape "dentists in Austin TX" --out leads.json
+```
+
+> Python and npm CLIs are both named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` if you install more than one.
 
 ## Product & docs links
 
@@ -76,9 +96,10 @@ console.log(rows.length, rows[0]);
 | Account / API key | https://gmapsleadfinder.com/account#api-key |
 | npm | https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper |
 | PyPI | https://pypi.org/project/google-maps-scraper-sdk/ |
+| Go (pkg.go.dev) | https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go |
 | Support | support@gmapsleadfinder.com |
 
-Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
+Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Go](go/README.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
 
 ## Remote MCP (Claude / Cursor / Codex)
 
@@ -121,6 +142,7 @@ MCP tools: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`.
 ```text
 python/          # PyPI: google-maps-scraper-sdk (import gmaps_scraper)
 typescript/      # npm: @gmapsleadfinder/google-maps-scraper
+go/              # Go module (pkg.go.dev); tag go/vX.Y.Z
 docs/            # Human guides
 openapi/         # OpenAPI snapshot
 AGENTS.md        # Instructions for AI agents
