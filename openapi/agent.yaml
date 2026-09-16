@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: GMaps Lead Finder Agent HTTP API
+  version: "1.0"
+  description: >
+    Agent HTTP API for AI clients and scripts. Auth via Bearer API key (gmf_…).
+    Exactly one keyword per job. Shares a single in-flight job lock with the web app.
+    For Remote MCP setup, see https://gmapsleadfinder.com/docs/agent
+servers:
+  - url: https://gmapsleadfinder.com
+paths:
+  /mcp:
+    post:
+      summary: Hosted Remote MCP (see /docs/agent)
+      description: Streamable HTTP JSON-RPC. Prefer the Agent & MCP docs for install and tools.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: JSON-RPC response
+        "401":
+          description: Missing or invalid API key
+  /api/v1/me:
+    get:
+      summary: Current plan and credits
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Plan and credits snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "401":
+          description: Missing or invalid API key
+        "403":
+          description: Plan cannot use agent API
+  /api/v1/jobs:
+    post:
+      summary: Create a single-keyword job
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [keyword]
+              properties:
+                keyword:
+                  type: string
+                  description: Exactly one Maps search keyword
+      responses:
+        "200":
+          description: Job queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateJobResponse"
+        "400":
+          description: Invalid keyword count
+        "401":
+          description: Missing or invalid API key
+        "402":
+          description: No credits remaining
+        "403":
+          description: Plan cannot use agent API
+        "409":
+          description: Another job is already running
+  /api/v1/jobs/{id}:
+    get:
+      summary: Job status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Job metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResponse"
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
+  /api/v1/jobs/{id}/results:
+    get:
+      summary: Paginated place rows as JSON
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: cursor
+          in: query
+          description: Offset cursor from previous nextCursor
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Projected rows (export columns)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultsResponse"
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: gmf_…
+  schemas:
+    MeResponse:
+      type: object
+      required: [plan, creditsLimit, creditsUsed, creditsRemaining]
+      properties:
+        plan:
+          type: string
+        creditsLimit:
+          type: number
+        creditsUsed:
+          type: number
+        creditsRemaining:
+          type: number
+    CreateJobResponse:
+      type: object
+      required: [jobId, keywordCount, creditsRemaining]
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        keywordCount:
+          type: integer
+        creditsRemaining:
+          type: number
+    JobFile:
+      type: object
+      properties:
+        id:
+          type: string
+        keyword:
+          type: string
+        position:
+          type: integer
+        status:
+          type: string
+        pageCount:
+          type: integer
+        rowCount:
+          type: integer
+        enrichStatus:
+          type: string
+        error:
+          type: string
+          nullable: true
+    JobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        keywordCount:
+          type: integer
+        currentKeywordIndex:
+          type: integer
+        rowCount:
+          type: integer
+        error:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/JobFile"
+        creditsRemaining:
+          type: number
+    ResultsResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+        count:
+          type: integer
+        total:
+          type: integer
+        cursor:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true

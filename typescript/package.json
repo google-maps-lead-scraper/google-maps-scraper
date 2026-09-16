@@ -1,0 +1,47 @@
+{
+  "name": "@gmapsleadfinder/google-maps-scraper",
+  "version": "0.1.0",
+  "description": "Official TypeScript client for GMaps Lead Finder Agent HTTP API",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "gmaps-scraper": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "google-maps",
+    "scraper",
+    "leads",
+    "gmapsleadfinder",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/google-maps-lead-scraper/google-maps-scraper.git"
+  },
+  "homepage": "https://gmapsleadfinder.com",
+  "bugs": {
+    "url": "https://github.com/google-maps-lead-scraper/google-maps-scraper/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
