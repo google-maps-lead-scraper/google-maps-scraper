@@ -1,6 +1,6 @@
 # Publishing (maintainers)
 
-This monorepo ships four client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
+This monorepo ships five client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
 
 | Ecosystem | Package / module | Source directory |
 |-----------|------------------|------------------|
@@ -8,17 +8,19 @@ This monorepo ships four client packages; **PHP** lives in a separate repo. Keep
 | PyPI | `google-maps-scraper-sdk` | [`python/`](../python/) |
 | Go | `github.com/google-maps-lead-scraper/google-maps-scraper/go` | [`go/`](../go/) |
 | crates.io | `google-maps-scraper-sdk` | [`rust/`](../rust/) |
+| RubyGems | `google-maps-scraper-sdk` | [`ruby/`](../ruby/) |
 | Packagist | `gmapsleadfinder/google-maps-scraper` | [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (separate repo) |
 
 Import / CLI reminders:
 
 - Python import stays `gmaps_scraper` even though the PyPI name is `google-maps-scraper-sdk`.
 - Rust crate is also `google-maps-scraper-sdk` (Rust path `google_maps_scraper_sdk`).
+- Ruby gem is `google-maps-scraper-sdk` (require `gmaps_scraper` → `GmapsScraper`).
 - Go import alias is typically `gmaps`.
 - PHP namespace is `GmapsLeadFinder\GoogleMapsScraper\`.
-- Python / npm / Rust / PHP CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli` / `vendor/bin/gmaps-scraper`.
+- Python / npm / Rust / PHP / Ruby CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper`.
 
-Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, PHP `composer.json`, and Go/Rust/PHP user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
+Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, `ruby/lib/gmaps_scraper/version.rb`, PHP `composer.json`, and Go/Rust/PHP/Ruby user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
 
 ## npm (`@gmapsleadfinder/google-maps-scraper`)
 
@@ -127,6 +129,26 @@ Users:
 composer require gmapsleadfinder/google-maps-scraper:^0.1.1
 ```
 
+## RubyGems (`google-maps-scraper-sdk`)
+
+1. Register at https://rubygems.org and enable MFA.
+2. Create an API key (Settings → API keys) with push permission.
+3. Build and push from `ruby/`:
+
+```bash
+cd ruby
+gem build google-maps-scraper-sdk.gemspec
+gem push google-maps-scraper-sdk-0.1.1.gem
+```
+
+Users:
+
+```bash
+gem install google-maps-scraper-sdk
+# or: bundle add google-maps-scraper-sdk
+require "gmaps_scraper" # GmapsScraper::Client
+```
+
 ## After publish
 
 - Confirm:
@@ -135,5 +157,6 @@ composer require gmapsleadfinder/google-maps-scraper:^0.1.1
   - https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go
   - https://crates.io/crates/google-maps-scraper-sdk
   - https://packagist.org/packages/gmapsleadfinder/google-maps-scraper
+  - https://rubygems.org/gems/google-maps-scraper-sdk
 
 No GitHub Actions publish workflow is configured yet; releases are manual.

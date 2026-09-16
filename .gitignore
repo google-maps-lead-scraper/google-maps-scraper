@@ -33,6 +33,12 @@ package-lock.json
 rust/target/
 Cargo.lock
 
+# Ruby
+ruby/*.gem
+ruby/vendor/
+ruby/.bundle/
+Gemfile.lock
+
 # OS / editors
 .DS_Store
 Thumbs.db

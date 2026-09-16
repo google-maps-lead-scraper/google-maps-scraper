@@ -9,12 +9,13 @@ All notable changes to this project will be documented in this file.
 - Go SDK module `github.com/google-maps-lead-scraper/google-maps-scraper/go` (tag `go/v0.1.1` for pkg.go.dev)
 - Rust crate `google-maps-scraper-sdk` for crates.io (`rust/`)
 - PHP SDK Packagist `gmapsleadfinder/google-maps-scraper` in separate repo [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (`v0.1.1`)
+- Ruby gem `google-maps-scraper-sdk` for RubyGems (`ruby/`, require `gmaps_scraper`)
 
 ### Changed
 
 - Expanded SEO package READMEs and added README hero image
 - Bumped npm `@gmapsleadfinder/google-maps-scraper` and PyPI `google-maps-scraper-sdk` to `0.1.1`
-- Root README / publishing / AGENTS / llms link PHP + Packagist
+- Root README / publishing / AGENTS / llms link PHP + Packagist + Ruby
 
 ## [0.1.0] - 2026-09-16
 
