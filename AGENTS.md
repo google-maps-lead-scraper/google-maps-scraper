@@ -10,6 +10,16 @@ Official **client kit** for [GMaps Lead Finder](https://gmapsleadfinder.com). It
 - Auth: `Authorization: Bearer gmf_<key>`
 - Env: `GMF_API_KEY` (optional `GMF_BASE_URL`)
 
+## Preferred install (for end users / agents)
+
+```bash
+pip install google-maps-scraper-sdk
+# import: from gmaps_scraper import Client
+
+npm install @gmapsleadfinder/google-maps-scraper
+# import: import { Client } from "@gmapsleadfinder/google-maps-scraper"
+```
+
 ## Prefer MCP vs HTTP
 
 | Situation | Use |

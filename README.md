@@ -1,6 +1,8 @@
 # Google Maps Scraper (GMaps Lead Finder Client)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@gmapsleadfinder/google-maps-scraper.svg)](https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper)
+[![PyPI](https://img.shields.io/pypi/v/google-maps-scraper-sdk.svg)](https://pypi.org/project/google-maps-scraper-sdk/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg)](python/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](typescript/)
 
@@ -25,10 +27,10 @@ Full walkthrough: [docs/getting-api-key.md](docs/getting-api-key.md).
 ### Python
 
 ```bash
-cd python
-pip install -e .
+pip install google-maps-scraper-sdk
 gmaps-scraper me
 gmaps-scraper scrape "dentists in Austin TX" --out leads.json
+# or: python -m gmaps_scraper me
 ```
 
 ```python
@@ -39,12 +41,10 @@ rows = client.scrape("dentists in Austin TX")
 print(len(rows), rows[0] if rows else None)
 ```
 
-### TypeScript
+### TypeScript / Node
 
 ```bash
-cd typescript
-npm install
-npm run build
+npm install @gmapsleadfinder/google-maps-scraper
 npx gmaps-scraper me
 npx gmaps-scraper scrape "dentists in Austin TX" --out leads.json
 ```
@@ -57,6 +57,8 @@ const rows = await client.scrape("dentists in Austin TX");
 console.log(rows.length, rows[0]);
 ```
 
+> Both packages ship a CLI named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` if you install both globally.
+
 ## Product & docs links
 
 | Resource | URL |
@@ -68,9 +70,11 @@ console.log(rows.length, rows[0]);
 | Agents hub | https://gmapsleadfinder.com/agents |
 | OpenAPI | https://gmapsleadfinder.com/openapi-agent.yaml |
 | Account / API key | https://gmapsleadfinder.com/account#api-key |
+| npm | https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper |
+| PyPI | https://pypi.org/project/google-maps-scraper-sdk/ |
 | Support | support@gmapsleadfinder.com |
 
-Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
+Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
 
 ## Remote MCP (Claude / Cursor / Codex)
 
@@ -111,8 +115,8 @@ MCP tools: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`.
 ## Repository layout
 
 ```text
-python/          # SDK + CLI (gmaps-scraper)
-typescript/      # SDK + CLI
+python/          # PyPI: google-maps-scraper-sdk (import gmaps_scraper)
+typescript/      # npm: @gmapsleadfinder/google-maps-scraper
 docs/            # Human guides
 openapi/         # OpenAPI snapshot
 AGENTS.md        # Instructions for AI agents

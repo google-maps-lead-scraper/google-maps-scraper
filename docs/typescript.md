@@ -1,16 +1,23 @@
 # TypeScript SDK
 
-Package lives in [`typescript/`](../typescript/).
+npm package: [`@gmapsleadfinder/google-maps-scraper`](https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper)  
+Source: [`typescript/`](../typescript/)
 
 ## Install
+
+```bash
+npm install @gmapsleadfinder/google-maps-scraper
+```
+
+Requires Node.js 18+ (uses global `fetch`).
+
+### Develop from this repo
 
 ```bash
 cd typescript
 npm install
 npm run build
 ```
-
-Requires Node.js 18+ (uses global `fetch`).
 
 ## Configuration
 
@@ -56,7 +63,7 @@ npx gmaps-scraper scrape "dentists in Austin TX" --out leads.json
 npx gmaps-scraper scrape "dentists in Austin TX" --out leads.csv
 ```
 
-After `npm link` or global install, the binary is also `gmaps-scraper`.
+After a global install (`npm i -g @gmapsleadfinder/google-maps-scraper`), the binary is also `gmaps-scraper`. Prefer `npx` if you also installed the Python CLI globally (same command name).
 
 ## Examples
 
@@ -66,9 +73,10 @@ After `npm link` or global install, the binary is also `gmaps-scraper`.
 
 ## Errors
 
-Classes in `./errors`: `AuthenticationError` (401), `PlanNotAllowedError` (403), `InsufficientCreditsError` (402), `JobConflictError` (409), `NotFoundError` (404), `ApiError` (other).
+Classes exported from the package: `AuthenticationError` (401), `PlanNotAllowedError` (403), `InsufficientCreditsError` (402), `JobConflictError` (409), `NotFoundError` (404), `ApiError` (other).
 
 ## Related
 
 - [HTTP API](http-api.md)
+- [Publishing (maintainers)](publishing.md)
 - Live docs: https://gmapsleadfinder.com/docs/api

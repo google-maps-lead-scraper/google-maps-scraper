@@ -35,6 +35,8 @@
 
 ## SDK entrypoints
 
-- Python package: python/ (import gmaps_scraper; CLI gmaps-scraper)
-- TypeScript package: typescript/ (Client; CLI gmaps-scraper)
+- Install Python: `pip install google-maps-scraper-sdk` (import `gmaps_scraper`; CLI `gmaps-scraper` or `python -m gmaps_scraper`)
+- Install TypeScript: `npm install @gmapsleadfinder/google-maps-scraper` (CLI `npx gmaps-scraper`)
+- Source: `/python`, `/typescript`
 - High-level helper: scrape(keyword) creates job, polls, returns all rows
+- Maintainer publish guide: /docs/publishing.md

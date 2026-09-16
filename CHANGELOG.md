@@ -6,9 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Python SDK + `gmaps-scraper` CLI
-- TypeScript SDK + CLI
+- Python SDK published as PyPI `google-maps-scraper-sdk` (import `gmaps_scraper`) + `gmaps-scraper` CLI
+- TypeScript SDK published as npm `@gmapsleadfinder/google-maps-scraper` + CLI
 - Examples for quickstart, CSV export, and sequential keywords
-- Docs: API key setup, HTTP API, MCP, Python, TypeScript
+- Docs: API key setup, HTTP API, MCP, Python, TypeScript, publishing
 - `AGENTS.md` and `llms.txt` for AI clients
 - Bundled OpenAPI snapshot at `openapi/agent.yaml`

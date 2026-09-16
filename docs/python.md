@@ -1,15 +1,23 @@
 # Python SDK
 
-Package lives in [`python/`](../python/).
+PyPI package: [`google-maps-scraper-sdk`](https://pypi.org/project/google-maps-scraper-sdk/)  
+Import name: `gmaps_scraper`  
+Source: [`python/`](../python/)
 
 ## Install
+
+```bash
+pip install google-maps-scraper-sdk
+```
+
+Requires Python 3.10+. Uses the standard library only (no third-party HTTP deps).
+
+### Develop from this repo
 
 ```bash
 cd python
 pip install -e .
 ```
-
-Requires Python 3.10+. Uses the standard library only (no third-party HTTP deps).
 
 ## Configuration
 
@@ -55,6 +63,10 @@ page = client.get_results(job_id, limit=100, cursor="0")
 gmaps-scraper me
 gmaps-scraper scrape "dentists in Austin TX" --out leads.json
 gmaps-scraper scrape "dentists in Austin TX" --out leads.csv
+
+# Avoid PATH clashes with the npm CLI:
+python -m gmaps_scraper me
+python -m gmaps_scraper.cli scrape "dentists in Austin TX"
 ```
 
 ## Examples
@@ -70,4 +82,5 @@ Typed exceptions in `gmaps_scraper.errors`: `AuthenticationError` (401), `PlanNo
 ## Related
 
 - [HTTP API](http-api.md)
+- [Publishing (maintainers)](publishing.md)
 - Live docs: https://gmapsleadfinder.com/docs/api
