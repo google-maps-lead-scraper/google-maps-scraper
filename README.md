@@ -9,12 +9,14 @@
 [![PyPI](https://img.shields.io/pypi/v/google-maps-scraper-sdk.svg)](https://pypi.org/project/google-maps-scraper-sdk/)
 [![Crates.io](https://img.shields.io/crates/v/google-maps-scraper-sdk.svg)](https://crates.io/crates/google-maps-scraper-sdk)
 [![Go Reference](https://pkg.go.dev/badge/github.com/google-maps-lead-scraper/google-maps-scraper/go.svg)](https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go)
+[![Packagist](https://img.shields.io/packagist/v/gmapsleadfinder/google-maps-scraper.svg)](https://packagist.org/packages/gmapsleadfinder/google-maps-scraper)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg)](python/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](typescript/)
 [![Go 1.22+](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](go/)
 [![Rust](https://img.shields.io/badge/rust-1.70+-dea584.svg)](rust/)
+[![PHP 8.1+](https://img.shields.io/badge/php-8.1+-777BB4.svg)](https://github.com/google-maps-lead-scraper/google-maps-scraper-php)
 
-Official open-source **Python + TypeScript + Go + Rust** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
+Official open-source **Python + TypeScript + Go + Rust + PHP** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
 
 This repo does **not** run a local browser crawler. It calls the same cloud scrape-and-enrich pipeline as the Online Lead Extractor.
 
@@ -98,7 +100,25 @@ let rows = client.scrape("dentists in Austin TX", Default::default())?;
 println!("{} {:?}", rows.len(), rows.first());
 ```
 
-> Python, npm, and Rust CLIs may all be named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` / `cargo run --bin gmaps-scraper` if you install more than one.
+### PHP
+
+```bash
+composer require gmapsleadfinder/google-maps-scraper
+vendor/bin/gmaps-scraper me
+vendor/bin/gmaps-scraper scrape "dentists in Austin TX" --out leads.json
+```
+
+```php
+use GmapsLeadFinder\GoogleMapsScraper\Client;
+
+$client = new Client(); // reads GMF_API_KEY
+$rows = $client->scrape("dentists in Austin TX");
+echo count($rows), "\n";
+```
+
+Source: [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (Packagist: `gmapsleadfinder/google-maps-scraper`).
+
+> Python, npm, Rust, and PHP CLIs may all be named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` / `cargo run --bin gmaps-scraper` / `vendor/bin/gmaps-scraper` if you install more than one.
 
 ## Product & docs links
 
@@ -115,6 +135,8 @@ println!("{} {:?}", rows.len(), rows.first());
 | PyPI | https://pypi.org/project/google-maps-scraper-sdk/ |
 | Go (pkg.go.dev) | https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go |
 | crates.io | https://crates.io/crates/google-maps-scraper-sdk |
+| Packagist (PHP) | https://packagist.org/packages/gmapsleadfinder/google-maps-scraper |
+| PHP repo | https://github.com/google-maps-lead-scraper/google-maps-scraper-php |
 | Support | support@gmapsleadfinder.com |
 
 Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Go](go/README.md) · [Rust](rust/README.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
@@ -166,6 +188,9 @@ docs/            # Human guides
 openapi/         # OpenAPI snapshot
 AGENTS.md        # Instructions for AI agents
 llms.txt         # Machine-readable summary
+
+# PHP lives in a separate repo (Packagist root composer.json):
+# https://github.com/google-maps-lead-scraper/google-maps-scraper-php
 ```
 
 ## License

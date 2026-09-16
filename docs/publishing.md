@@ -1,6 +1,6 @@
 # Publishing (maintainers)
 
-This monorepo ships four client packages. Keep versions aligned when releasing together (currently **0.1.1**).
+This monorepo ships four client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
 
 | Ecosystem | Package / module | Source directory |
 |-----------|------------------|------------------|
@@ -8,15 +8,17 @@ This monorepo ships four client packages. Keep versions aligned when releasing t
 | PyPI | `google-maps-scraper-sdk` | [`python/`](../python/) |
 | Go | `github.com/google-maps-lead-scraper/google-maps-scraper/go` | [`go/`](../go/) |
 | crates.io | `google-maps-scraper-sdk` | [`rust/`](../rust/) |
+| Packagist | `gmapsleadfinder/google-maps-scraper` | [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (separate repo) |
 
 Import / CLI reminders:
 
 - Python import stays `gmaps_scraper` even though the PyPI name is `google-maps-scraper-sdk`.
 - Rust crate is also `google-maps-scraper-sdk` (Rust path `google_maps_scraper_sdk`).
 - Go import alias is typically `gmaps`.
-- Python / npm / Rust CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli`.
+- PHP namespace is `GmapsLeadFinder\GoogleMapsScraper\`.
+- Python / npm / Rust / PHP CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli` / `vendor/bin/gmaps-scraper`.
 
-Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, and Go/Rust user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
+Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, PHP `composer.json`, and Go/Rust/PHP user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
 
 ## npm (`@gmapsleadfinder/google-maps-scraper`)
 
@@ -97,6 +99,34 @@ cargo install google-maps-scraper-sdk --bin gmaps-scraper
 
 docs.rs builds automatically after publish: https://docs.rs/google-maps-scraper-sdk
 
+## Packagist (`gmapsleadfinder/google-maps-scraper`)
+
+PHP is **not** in this monorepo (Packagist needs `composer.json` at the repo root). Source:
+
+https://github.com/google-maps-lead-scraper/google-maps-scraper-php
+
+No git subtree — edit and release only in that repo.
+
+```bash
+cd /path/to/google-maps-scraper-php
+# bump version in composer.json + User-Agent if needed
+git add -A && git commit -m "Release v0.1.1"
+git tag v0.1.1
+git push origin main --tags
+```
+
+First-time Packagist:
+
+1. Log in at https://packagist.org
+2. Submit → `https://github.com/google-maps-lead-scraper/google-maps-scraper-php`
+3. Enable GitHub Service Hook / Packagist GitHub App for auto-updates
+
+Users:
+
+```bash
+composer require gmapsleadfinder/google-maps-scraper:^0.1.1
+```
+
 ## After publish
 
 - Confirm:
@@ -104,5 +134,6 @@ docs.rs builds automatically after publish: https://docs.rs/google-maps-scraper-
   - https://pypi.org/project/google-maps-scraper-sdk/
   - https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go
   - https://crates.io/crates/google-maps-scraper-sdk
+  - https://packagist.org/packages/gmapsleadfinder/google-maps-scraper
 
 No GitHub Actions publish workflow is configured yet; releases are manual.

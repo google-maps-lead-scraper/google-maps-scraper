@@ -24,6 +24,10 @@ go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
 
 cargo add google-maps-scraper-sdk
 # use google_maps_scraper_sdk::{Client, ClientOptions};
+
+composer require gmapsleadfinder/google-maps-scraper
+# use GmapsLeadFinder\GoogleMapsScraper\Client;
+# repo: https://github.com/google-maps-lead-scraper/google-maps-scraper-php
 ```
 
 ## Prefer MCP vs HTTP
@@ -31,7 +35,7 @@ cargo add google-maps-scraper-sdk
 | Situation | Use |
 |-----------|-----|
 | User is in Claude / Cursor / Codex with MCP support | **Remote MCP** at `https://gmapsleadfinder.com/mcp` |
-| Scripts, CI, custom apps | **HTTP** via Python/TS/Go/Rust SDK or raw `fetch`/`curl` |
+| Scripts, CI, custom apps | **HTTP** via Python/TS/Go/Rust/PHP SDK or raw `fetch`/`curl` |
 
 MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`.
 
@@ -48,7 +52,7 @@ MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gma
 3. Poll `GET /api/v1/jobs/{id}` until `completed`, `partial`, or `failed`.
 4. `GET /api/v1/jobs/{id}/results?limit=100` and follow `nextCursor` until `null`.
 
-Or use SDK helpers: `scrape` / `Scrape` (Python / TypeScript / Go / Rust) which polls and paginates.
+Or use SDK helpers: `scrape` / `Scrape` (Python / TypeScript / Go / Rust / PHP) which polls and paginates.
 
 ## Hard constraints
 
@@ -68,11 +72,13 @@ Rows are objects keyed by export column headers, e.g. `Name`, `Phone`, `Website`
 - OpenAPI: https://gmapsleadfinder.com/openapi-agent.yaml (repo copy: `openapi/agent.yaml`)
 - Pricing: https://gmapsleadfinder.com/pricing
 - Repo guides: `docs/getting-api-key.md`, `docs/http-api.md`, `docs/mcp.md`, `docs/python.md`, `docs/typescript.md`, `go/README.md`, `rust/README.md`
+- PHP SDK (separate repo): https://github.com/google-maps-lead-scraper/google-maps-scraper-php — Packagist `gmapsleadfinder/google-maps-scraper`
 
 ## When editing this repo
 
-- Keep Python, TypeScript, Go, and Rust public APIs aligned.
+- Keep Python, TypeScript, Go, Rust, and PHP public APIs aligned (PHP changes land in the separate PHP repo).
 - Do not add Playwright/Selenium scrapers or auth bypasses.
 - Update examples and docs together when changing client surfaces.
 - Go releases use Git tags `go/vX.Y.Z` (see `docs/publishing.md`).
 - Rust releases use `cargo publish` from `rust/`.
+- PHP releases: tag `vX.Y.Z` in the PHP repo and Packagist auto-update (no subtree).
