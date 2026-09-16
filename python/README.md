@@ -1,5 +1,9 @@
 # Google Maps Scraper
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/google-maps-lead-scraper/google-maps-scraper/main/google-maps-scraper.png" alt="Google Maps Lead Scraper" width="100%" />
+</p>
+
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
 Python SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.

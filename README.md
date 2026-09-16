@@ -1,5 +1,9 @@
 # Google Maps Scraper (GMaps Lead Finder Client)
 
+<p align="center">
+  <img src="./google-maps-scraper.png" alt="Google Maps Lead Scraper" width="100%" />
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@gmapsleadfinder/google-maps-scraper.svg)](https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper)
 [![PyPI](https://img.shields.io/pypi/v/google-maps-scraper-sdk.svg)](https://pypi.org/project/google-maps-scraper-sdk/)
