@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-09-16
+
+### Changed
+
+- Expanded SEO package READMEs and added README hero image
+- Bumped npm `@gmapsleadfinder/google-maps-scraper` and PyPI `google-maps-scraper-sdk` to `0.1.1`
+
 ## [0.1.0] - 2026-09-16
 
 ### Added

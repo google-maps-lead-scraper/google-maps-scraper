@@ -1,6 +1,6 @@
 # Publishing (maintainers)
 
-This monorepo ships two packages with aligned version numbers (currently **0.1.0**).
+This monorepo ships two packages with aligned version numbers (currently **0.1.1**).
 
 | Ecosystem | Package name | Source directory |
 |-----------|--------------|------------------|
