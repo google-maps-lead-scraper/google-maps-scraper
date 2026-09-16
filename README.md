@@ -11,14 +11,16 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/google-maps-lead-scraper/google-maps-scraper/go.svg)](https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go)
 [![Packagist](https://img.shields.io/packagist/v/gmapsleadfinder/google-maps-scraper.svg)](https://packagist.org/packages/gmapsleadfinder/google-maps-scraper)
 [![Gem Version](https://img.shields.io/gem/v/google-maps-scraper-sdk.svg)](https://rubygems.org/gems/google-maps-scraper-sdk)
+[![NuGet](https://img.shields.io/nuget/v/GmapsLeadFinder.GoogleMapsScraper.svg)](https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg)](python/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-339933.svg)](typescript/)
 [![Go 1.22+](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](go/)
 [![Rust](https://img.shields.io/badge/rust-1.70+-dea584.svg)](rust/)
 [![PHP 8.1+](https://img.shields.io/badge/php-8.1+-777BB4.svg)](https://github.com/google-maps-lead-scraper/google-maps-scraper-php)
 [![Ruby 3.1+](https://img.shields.io/badge/ruby-3.1+-CC342D.svg)](ruby/)
+[![.NET 8+](https://img.shields.io/badge/.NET-8+-512BD4.svg)](dotnet/)
 
-Official open-source **Python + TypeScript + Go + Rust + PHP + Ruby** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
+Official open-source **Python + TypeScript + Go + Rust + PHP + Ruby + .NET** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
 
 This repo does **not** run a local browser crawler. It calls the same cloud scrape-and-enrich pipeline as the Online Lead Extractor.
 
@@ -137,7 +139,24 @@ rows = client.scrape("dentists in Austin TX")
 puts rows.length
 ```
 
-> Python, npm, Rust, PHP, and Ruby CLIs may all be named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` / `cargo run --bin gmaps-scraper` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper` if you install more than one.
+### .NET
+
+```bash
+dotnet add package GmapsLeadFinder.GoogleMapsScraper
+dotnet tool install -g GmapsLeadFinder.GoogleMapsScraper.Cli
+gmaps-scraper me
+gmaps-scraper scrape "dentists in Austin TX" --out leads.json
+```
+
+```csharp
+using GmapsLeadFinder.GoogleMapsScraper;
+
+using var client = new Client(); // reads GMF_API_KEY
+var rows = await client.ScrapeAsync("dentists in Austin TX");
+Console.WriteLine(rows.Count);
+```
+
+> Python, npm, Rust, PHP, Ruby, and .NET CLIs may all be named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` / `cargo run --bin gmaps-scraper` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper` / `dotnet tool` if you install more than one.
 
 ## Product & docs links
 
@@ -157,9 +176,10 @@ puts rows.length
 | Packagist (PHP) | https://packagist.org/packages/gmapsleadfinder/google-maps-scraper |
 | PHP repo | https://github.com/google-maps-lead-scraper/google-maps-scraper-php |
 | RubyGems | https://rubygems.org/gems/google-maps-scraper-sdk |
+| NuGet | https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper |
 | Support | support@gmapsleadfinder.com |
 
-Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Go](go/README.md) · [Rust](rust/README.md) · [Ruby](ruby/README.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
+Repo docs: [HTTP](docs/http-api.md) · [MCP](docs/mcp.md) · [Python](docs/python.md) · [TypeScript](docs/typescript.md) · [Go](go/README.md) · [Rust](rust/README.md) · [Ruby](ruby/README.md) · [.NET](dotnet/README.md) · [Publishing](docs/publishing.md) · [AGENTS.md](AGENTS.md) · [llms.txt](llms.txt)
 
 ## Remote MCP (Claude / Cursor / Codex)
 
@@ -205,6 +225,7 @@ typescript/      # npm: @gmapsleadfinder/google-maps-scraper
 go/              # Go module (pkg.go.dev); tag go/vX.Y.Z
 rust/            # crates.io: google-maps-scraper-sdk
 ruby/            # RubyGems: google-maps-scraper-sdk (require gmaps_scraper)
+dotnet/          # NuGet: GmapsLeadFinder.GoogleMapsScraper (+ Cli tool)
 docs/            # Human guides
 openapi/         # OpenAPI snapshot
 AGENTS.md        # Instructions for AI agents

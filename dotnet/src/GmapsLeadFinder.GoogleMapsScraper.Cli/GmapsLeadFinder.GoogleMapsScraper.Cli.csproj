@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>GmapsLeadFinder.GoogleMapsScraper.Cli</RootNamespace>
+    <AssemblyName>gmaps-scraper</AssemblyName>
+    <Version>0.1.1</Version>
+    <Authors>GMaps Lead Finder</Authors>
+    <Description>CLI for GMaps Lead Finder Google Maps Scraper SDK</Description>
+    <PackageId>GmapsLeadFinder.GoogleMapsScraper.Cli</PackageId>
+    <PackageTags>google-maps;scraper;cli;gmapsleadfinder</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gmapsleadfinder.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/google-maps-lead-scraper/google-maps-scraper</RepositoryUrl>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gmaps-scraper</ToolCommandName>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GmapsLeadFinder.GoogleMapsScraper\GmapsLeadFinder.GoogleMapsScraper.csproj" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

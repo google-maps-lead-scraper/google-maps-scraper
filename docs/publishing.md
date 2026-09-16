@@ -1,6 +1,6 @@
 # Publishing (maintainers)
 
-This monorepo ships five client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
+This monorepo ships six client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
 
 | Ecosystem | Package / module | Source directory |
 |-----------|------------------|------------------|
@@ -9,6 +9,7 @@ This monorepo ships five client packages; **PHP** lives in a separate repo. Keep
 | Go | `github.com/google-maps-lead-scraper/google-maps-scraper/go` | [`go/`](../go/) |
 | crates.io | `google-maps-scraper-sdk` | [`rust/`](../rust/) |
 | RubyGems | `google-maps-scraper-sdk` | [`ruby/`](../ruby/) |
+| NuGet | `GmapsLeadFinder.GoogleMapsScraper` (+ `.Cli` tool) | [`dotnet/`](../dotnet/) |
 | Packagist | `gmapsleadfinder/google-maps-scraper` | [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (separate repo) |
 
 Import / CLI reminders:
@@ -16,11 +17,12 @@ Import / CLI reminders:
 - Python import stays `gmaps_scraper` even though the PyPI name is `google-maps-scraper-sdk`.
 - Rust crate is also `google-maps-scraper-sdk` (Rust path `google_maps_scraper_sdk`).
 - Ruby gem is `google-maps-scraper-sdk` (require `gmaps_scraper` → `GmapsScraper`).
+- .NET package/namespace is `GmapsLeadFinder.GoogleMapsScraper`; CLI tool package is `GmapsLeadFinder.GoogleMapsScraper.Cli`.
 - Go import alias is typically `gmaps`.
 - PHP namespace is `GmapsLeadFinder\GoogleMapsScraper\`.
-- Python / npm / Rust / PHP / Ruby CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper`.
+- Python / npm / Rust / PHP / Ruby / .NET CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper` / `dotnet tool`.
 
-Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, `ruby/lib/gmaps_scraper/version.rb`, PHP `composer.json`, and Go/Rust/PHP/Ruby user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
+Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, `ruby/lib/gmaps_scraper/version.rb`, `dotnet` csproj files, PHP `composer.json`, and Go/Rust/PHP/Ruby/.NET user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
 
 ## npm (`@gmapsleadfinder/google-maps-scraper`)
 
@@ -149,6 +151,29 @@ gem install google-maps-scraper-sdk
 require "gmaps_scraper" # GmapsScraper::Client
 ```
 
+## NuGet (`GmapsLeadFinder.GoogleMapsScraper`)
+
+1. Create an account at https://www.nuget.org and an API key (API Keys → Create).
+2. Scope the key to **Push** for new packages / your packages.
+3. Pack and push from `dotnet/`:
+
+```bash
+cd dotnet
+dotnet pack src/GmapsLeadFinder.GoogleMapsScraper -c Release
+dotnet pack src/GmapsLeadFinder.GoogleMapsScraper.Cli -c Release
+dotnet nuget push src/GmapsLeadFinder.GoogleMapsScraper/bin/Release/*.nupkg \
+  --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+dotnet nuget push src/GmapsLeadFinder.GoogleMapsScraper.Cli/bin/Release/*.nupkg \
+  --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+```
+
+Users:
+
+```bash
+dotnet add package GmapsLeadFinder.GoogleMapsScraper
+dotnet tool install -g GmapsLeadFinder.GoogleMapsScraper.Cli
+```
+
 ## After publish
 
 - Confirm:
@@ -158,5 +183,6 @@ require "gmaps_scraper" # GmapsScraper::Client
   - https://crates.io/crates/google-maps-scraper-sdk
   - https://packagist.org/packages/gmapsleadfinder/google-maps-scraper
   - https://rubygems.org/gems/google-maps-scraper-sdk
+  - https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper
 
 No GitHub Actions publish workflow is configured yet; releases are manual.

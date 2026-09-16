@@ -39,6 +39,12 @@ ruby/vendor/
 ruby/.bundle/
 Gemfile.lock
 
+# .NET
+**/bin/
+**/obj/
+*.nupkg
+*.snupkg
+
 # OS / editors
 .DS_Store
 Thumbs.db
