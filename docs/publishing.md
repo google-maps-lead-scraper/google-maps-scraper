@@ -1,20 +1,22 @@
 # Publishing (maintainers)
 
-This monorepo ships three client packages. Keep versions aligned when releasing together (currently **0.1.1**).
+This monorepo ships four client packages. Keep versions aligned when releasing together (currently **0.1.1**).
 
 | Ecosystem | Package / module | Source directory |
 |-----------|------------------|------------------|
 | npm | `@gmapsleadfinder/google-maps-scraper` | [`typescript/`](../typescript/) |
 | PyPI | `google-maps-scraper-sdk` | [`python/`](../python/) |
 | Go | `github.com/google-maps-lead-scraper/google-maps-scraper/go` | [`go/`](../go/) |
+| crates.io | `google-maps-scraper-sdk` | [`rust/`](../rust/) |
 
 Import / CLI reminders:
 
 - Python import stays `gmaps_scraper` even though the PyPI name is `google-maps-scraper-sdk`.
+- Rust crate is also `google-maps-scraper-sdk` (Rust path `google_maps_scraper_sdk`).
 - Go import alias is typically `gmaps`.
-- Python and npm CLIs are both named `gmaps-scraper`; prefer `npx` / `python -m gmaps_scraper` / `go run ./cli`.
+- Python / npm / Rust CLIs may share the name `gmaps-scraper`; prefer `npx` / `python -m` / `cargo run --bin gmaps-scraper` / `go run ./cli`.
 
-Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, and Go user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
+Before any release: bump versions in `typescript/package.json`, `python/pyproject.toml`, `rust/Cargo.toml`, and Go/Rust user-agent strings; update [`CHANGELOG.md`](../CHANGELOG.md); commit and push.
 
 ## npm (`@gmapsleadfinder/google-maps-scraper`)
 
@@ -48,18 +50,6 @@ python -m pip install build twine
 rm -rf dist build *.egg-info src/*.egg-info
 python -m build
 twine check dist/*
-```
-
-Optional TestPyPI first:
-
-```bash
-twine upload --repository testpypi dist/*
-pip install -i https://test.pypi.org/simple/ google-maps-scraper-sdk
-```
-
-Production:
-
-```bash
 twine upload dist/*
 # Username: __token__
 # Password: pypi-... (the API token)
@@ -70,25 +60,42 @@ twine upload dist/*
 Go has **no** package upload. Publish by pushing a **subdirectory module tag**:
 
 ```bash
-# After merging to main and pushing commits:
 git tag go/v0.1.1
 git push origin go/v0.1.1
-
-# Trigger the module proxy (optional but recommended):
 GOPROXY=https://proxy.golang.org go list -m github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
 ```
 
-Then open:
-
-https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
-
-If the page is missing, wait a few minutes or use the site’s request/index flow. Tag format for this monorepo subdirectory module must be `go/vX.Y.Z` (not a root-only `vX.Y.Z`).
-
-Install for users:
+Library install (inside a module):
 
 ```bash
+go mod init example.com/app
 go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
 ```
+
+Do **not** `go install` the library path (`package gmaps` is not `main`). Use `go run ./cli` from the repo for the CLI.
+
+## crates.io (`google-maps-scraper-sdk`)
+
+1. Register at https://crates.io (GitHub login recommended).
+2. Account Settings → API Tokens → New token.
+3. Publish:
+
+```bash
+cargo login
+cd rust
+cargo check
+cargo publish --dry-run
+cargo publish
+```
+
+Users:
+
+```bash
+cargo add google-maps-scraper-sdk
+cargo install google-maps-scraper-sdk --bin gmaps-scraper
+```
+
+docs.rs builds automatically after publish: https://docs.rs/google-maps-scraper-sdk
 
 ## After publish
 
@@ -96,16 +103,6 @@ go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
   - https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper
   - https://pypi.org/project/google-maps-scraper-sdk/
   - https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go
-- Smoke-test:
-
-```bash
-npm install @gmapsleadfinder/google-maps-scraper
-npx gmaps-scraper me
-
-pip install google-maps-scraper-sdk
-gmaps-scraper me
-
-go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
-```
+  - https://crates.io/crates/google-maps-scraper-sdk
 
 No GitHub Actions publish workflow is configured yet; releases are manual.

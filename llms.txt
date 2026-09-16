@@ -1,6 +1,6 @@
 # GMaps Lead Finder — Google Maps Scraper Client
 
-> Official open-source Python + TypeScript + Go client for the GMaps Lead Finder hosted Agent API.
+> Official open-source Python + TypeScript + Go + Rust client for the GMaps Lead Finder hosted Agent API.
 > Not a local browser scraper. Auth: Bearer gmf_… key. Env: GMF_API_KEY.
 
 ## Links
@@ -14,7 +14,7 @@
 - OpenAPI: https://gmapsleadfinder.com/openapi-agent.yaml
 - Support: support@gmapsleadfinder.com
 - Agent instructions in this repo: /AGENTS.md
-- Human docs: /docs/getting-api-key.md, /docs/http-api.md, /docs/mcp.md, /docs/python.md, /docs/typescript.md, /go/README.md
+- Human docs: /docs/getting-api-key.md, /docs/http-api.md, /docs/mcp.md, /docs/python.md, /docs/typescript.md, /go/README.md, /rust/README.md
 
 ## API summary
 
@@ -35,9 +35,10 @@
 
 ## SDK entrypoints
 
-- Install Python: `pip install google-maps-scraper-sdk` (import `gmaps_scraper`; CLI `gmaps-scraper` or `python -m gmaps_scraper`)
-- Install TypeScript: `npm install @gmapsleadfinder/google-maps-scraper` (CLI `npx gmaps-scraper`)
-- Install Go: `go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1` (import as `gmaps`; CLI `go run ./cli`)
-- Source: `/python`, `/typescript`, `/go`
+- Install Python: `pip install google-maps-scraper-sdk` (import `gmaps_scraper`)
+- Install TypeScript: `npm install @gmapsleadfinder/google-maps-scraper`
+- Install Go: inside a module, `go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1`
+- Install Rust: `cargo add google-maps-scraper-sdk` (path `google_maps_scraper_sdk`)
+- Source: `/python`, `/typescript`, `/go`, `/rust`
 - High-level helper: scrape/Scrape creates job, polls, returns all rows
-- Maintainer publish guide: /docs/publishing.md (Go: tag `go/vX.Y.Z` for pkg.go.dev)
+- Maintainer publish guide: /docs/publishing.md

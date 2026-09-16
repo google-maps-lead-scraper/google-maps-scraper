@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Go SDK module `github.com/google-maps-lead-scraper/google-maps-scraper/go` (tag `go/v0.1.1` for pkg.go.dev)
+- Rust crate `google-maps-scraper-sdk` for crates.io (`rust/`)
 
 ### Changed
 
