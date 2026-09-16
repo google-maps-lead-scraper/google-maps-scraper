@@ -1,17 +1,145 @@
-# Python client for GMaps Lead Finder
+# Google Maps Scraper
+
+**Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
+
+Python SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+
+- **PyPI:** [`google-maps-scraper-sdk`](https://pypi.org/project/google-maps-scraper-sdk/)
+- **Import:** `gmaps_scraper`
+- **CLI:** `gmaps-scraper` (or `python -m gmaps_scraper`)
+
+## Get an API key
+
+1. Sign in at [gmapsleadfinder.com](https://gmapsleadfinder.com).
+2. Use a plan with Agent API (**Growth** or higher) — see [Pricing](https://gmapsleadfinder.com/pricing).
+3. Open [Account → API key](https://gmapsleadfinder.com/account#api-key) and copy your `gmf_…` key.
+
+```bash
+export GMF_API_KEY=gmf_your_key_here
+```
+
+Never commit API keys or embed them in public frontends.
+
+## Install
 
 ```bash
 pip install google-maps-scraper-sdk
-export GMF_API_KEY=gmf_your_key_here
-gmaps-scraper me
-# or: python -m gmaps_scraper me
 ```
+
+Requires **Python 3.10+**. Uses the standard library only (no third-party HTTP dependencies).
+
+## Configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GMF_API_KEY` | Yes | Bearer key (`gmf_…`) |
+| `GMF_BASE_URL` | No | Default `https://gmapsleadfinder.com` |
+
+You can also pass credentials in code:
 
 ```python
 from gmaps_scraper import Client
 
-rows = Client().scrape("dentists in Austin TX")
+client = Client(api_key="gmf_…", base_url="https://gmapsleadfinder.com")
 ```
 
-PyPI: https://pypi.org/project/google-maps-scraper-sdk/  
-Docs: [../docs/python.md](../docs/python.md) · API: https://gmapsleadfinder.com/docs/api
+## Quickstart
+
+```python
+from gmaps_scraper import Client
+
+client = Client()  # reads GMF_API_KEY
+
+me = client.me()
+print(me["plan"], me["creditsRemaining"])
+
+# Google Maps scraper helper: create job → poll → fetch all rows
+rows = client.scrape("dentists in Austin TX")
+for row in rows[:5]:
+    print(row.get("Name"), row.get("Phone"), row.get("Website"), row.get("Emails"))
+```
+
+CLI:
+
+```bash
+gmaps-scraper me
+gmaps-scraper scrape "dentists in Austin TX" --out leads.json
+gmaps-scraper scrape "dentists in Austin TX" --out leads.csv
+```
+
+## Client API
+
+### `me()`
+
+Returns plan and credits: `plan`, `creditsLimit`, `creditsUsed`, `creditsRemaining`.
+
+### `create_job(keyword)`
+
+Queues a single-keyword Google Maps lead scrape. Body is exactly one search query (city + category works best).
+
+Returns: `jobId`, `keywordCount`, `creditsRemaining`.
+
+### `get_job(job_id)`
+
+Poll job status until `completed`, `partial`, or `failed` (also `queued` / `running` while in progress).
+
+### `get_results(job_id, *, limit=100, cursor=None)`
+
+Paginated place rows as `{ column_header: string }` objects. Follow `nextCursor` until `null`. `limit` is 1–500.
+
+### `scrape(keyword, *, poll_interval_ms=2000, timeout_ms=600_000, result_limit=100)`
+
+High-level Google Maps extractor: creates a job, polls to a terminal status, then returns **all** result rows.
+
+## CLI reference
+
+```bash
+gmaps-scraper me
+gmaps-scraper scrape "<keyword>" [--out path.json|path.csv]
+gmaps-scraper scrape "<keyword>" [--poll-interval-ms 2000] [--timeout-ms 600000]
+
+# Prefer module form if the npm CLI is also installed (same binary name):
+python -m gmaps_scraper me
+python -m gmaps_scraper.cli scrape "coffee shops in Austin TX" --out leads.csv
+```
+
+## Errors
+
+| HTTP | Exception | Meaning |
+|------|-----------|---------|
+| 400 | `BadRequestError` | Invalid request (e.g. not exactly one keyword) |
+| 401 | `AuthenticationError` | Missing or invalid API key |
+| 402 | `InsufficientCreditsError` | No credits remaining |
+| 403 | `PlanNotAllowedError` | Plan cannot use Agent API (need Growth+) |
+| 404 | `NotFoundError` | Job not found |
+| 409 | `JobConflictError` | Another job is already running for this user |
+| — | `TimeoutError` | Local poll timeout in `scrape()` |
+| other | `ApiError` | Base / unexpected API failure |
+
+## Limits
+
+- Exactly **one keyword** per API job.
+- Only **one running job** per user at a time (web UI, HTTP API, and MCP share the lock) → `409` if busy. For multiple keywords, scrape **sequentially**.
+- **1 credit = 1 place row**; enrich is included.
+- Agent API requires **Growth** or higher.
+- Empty email/social cells mean nothing public was found — contacts are never invented.
+
+## Links
+
+| Resource | URL |
+|----------|-----|
+| Website | https://gmapsleadfinder.com |
+| Pricing | https://gmapsleadfinder.com/pricing |
+| HTTP API docs | https://gmapsleadfinder.com/docs/api |
+| Agent & MCP | https://gmapsleadfinder.com/docs/agent |
+| OpenAPI | https://gmapsleadfinder.com/openapi-agent.yaml |
+| Get API key | https://gmapsleadfinder.com/account#api-key |
+| PyPI | https://pypi.org/project/google-maps-scraper-sdk/ |
+| Source / examples | https://github.com/google-maps-lead-scraper/google-maps-scraper |
+| Python guide | https://github.com/google-maps-lead-scraper/google-maps-scraper/blob/main/docs/python.md |
+
+Prefer Remote MCP for Claude / Cursor / Codex? See the [Agent docs](https://gmapsleadfinder.com/docs/agent).
+
+## License
+
+MIT
