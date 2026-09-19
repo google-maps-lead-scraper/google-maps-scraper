@@ -43,6 +43,10 @@ print(me["creditsRemaining"])
 rows = client.scrape("dentists in Austin TX")
 for row in rows[:5]:
     print(row.get("Name"), row.get("Phone"), row.get("Website"))
+
+# Single-place reviews / photos (run sequentially)
+reviews = client.scrape_reviews("https://maps.google.com/?cid=…")
+photos = client.scrape_photos("ChIJ…")  # Place ID, URL, or business_id
 ```
 
 ### Low-level methods
@@ -53,9 +57,13 @@ job_id = created["jobId"]
 
 job = client.get_job(job_id)
 page = client.get_results(job_id, limit=100, cursor="0")
+
+# Reviews / photos
+r = client.create_reviews_job("https://maps.google.com/?cid=…")
+p = client.create_photos_job("ChIJ…")
 ```
 
-`scrape()` options: `poll_interval_ms` (default `2000`), `timeout_ms` (default `600_000`), `result_limit` (default `100`).
+`scrape()` / `scrape_reviews()` / `scrape_photos()` options: `poll_interval_ms` (default `2000`), `timeout_ms` (default `600_000`), `result_limit` (default `100`).
 
 ## CLI
 

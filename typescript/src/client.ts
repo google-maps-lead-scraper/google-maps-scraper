@@ -24,7 +24,7 @@ const DEFAULT_BASE_URL = "https://gmapsleadfinder.com";
 const DEFAULT_POLL_INTERVAL_MS = 2000;
 const DEFAULT_TIMEOUT_MS = 600_000;
 const DEFAULT_RESULT_LIMIT = 100;
-const USER_AGENT = "gmaps-scraper-typescript/0.1.1";
+const USER_AGENT = "gmaps-scraper-typescript/0.1.2";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -243,7 +243,7 @@ export class Client {
     const rows: PlaceRow[] = [];
     let cursor: string | null = "0";
     while (cursor !== null) {
-      const page =
+      const page: ResultsResponse =
         kind === "reviews"
           ? await this.getReviewsResults(jobId, { limit: resultLimit, cursor })
           : kind === "photos"

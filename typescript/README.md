@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-TypeScript / Node.js SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+TypeScript / Node.js SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **npm:** [`@gmapsleadfinder/google-maps-scraper`](https://www.npmjs.com/package/@gmapsleadfinder/google-maps-scraper)
 - **Import:** `@gmapsleadfinder/google-maps-scraper`
@@ -65,6 +65,10 @@ const rows = await client.scrape("dentists in Austin TX");
 for (const row of rows.slice(0, 5)) {
   console.log(row.Name, row.Phone, row.Website, row.Emails);
 }
+
+// Single-place reviews / photos (run sequentially — one in-flight job per user)
+const reviews = await client.scrapeReviews("https://maps.google.com/?cid=…");
+const photos = await client.scrapePhotos("ChIJ…"); // Place ID, URL, or business_id
 ```
 
 CLI:
@@ -99,6 +103,22 @@ Paginated place rows as `{ [columnHeader]: string }` objects. Follow `nextCursor
 
 High-level Google Maps extractor: creates a job, polls to a terminal status, then returns **all** result rows.
 
+### `createReviewsJob(place)` / `getReviewsJob(jobId)` / `getReviewsResults(jobId, options)`
+
+Single-place reviews job. `place` is a Maps URL or `business_id`.
+
+### `scrapeReviews(place, options?)`
+
+Create reviews job → poll → all review rows. Same options as `scrape()`.
+
+### `createPhotosJob(place)` / `getPhotosJob(jobId)` / `getPhotosResults(jobId, options)`
+
+Single-place photos job. `place` is a Maps URL, `business_id`, or Place ID.
+
+### `scrapePhotos(place, options?)`
+
+Create photos job → poll → all photo rows. Same options as `scrape()`.
+
 ## CLI reference
 
 ```bash
@@ -127,8 +147,8 @@ If you also installed the Python package globally, both expose a `gmaps-scraper`
 
 ## Limits
 
-- Exactly **one keyword** per API job.
-- Only **one running job** per user at a time (web UI, HTTP API, and MCP share the lock) → `409` if busy. For multiple keywords, scrape **sequentially**.
+- Exactly **one keyword** per leads job; exactly **one place** per reviews or photos job.
+- Only **one running job** per user at a time (web UI, HTTP API, and MCP share the lock) → `409` if busy. For multiple keywords or places, scrape **sequentially**.
 - **1 credit = 1 place row**; enrich is included.
 - Agent API requires **Growth** or higher.
 - Empty email/social cells mean nothing public was found — contacts are never invented.

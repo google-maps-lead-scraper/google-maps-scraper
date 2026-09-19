@@ -21,7 +21,7 @@ func main() {
 	case "-h", "--help", "help":
 		printHelp()
 	case "--version", "version":
-		fmt.Println("0.1.1")
+		fmt.Println("0.1.2")
 	case "me":
 		client, err := gmaps.NewClient(nil)
 		must(err)
@@ -71,7 +71,7 @@ func main() {
 }
 
 func printHelp() {
-	fmt.Print(`gmaps-scraper (Go) 0.1.1
+	fmt.Print(`gmaps-scraper (Go) 0.1.2
 
 Usage:
   go run ./cli me

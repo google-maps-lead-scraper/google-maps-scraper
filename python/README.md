@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-Python SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+Python SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **PyPI:** [`google-maps-scraper-sdk`](https://pypi.org/project/google-maps-scraper-sdk/)
 - **Import:** `gmaps_scraper`
@@ -61,6 +61,10 @@ print(me["plan"], me["creditsRemaining"])
 rows = client.scrape("dentists in Austin TX")
 for row in rows[:5]:
     print(row.get("Name"), row.get("Phone"), row.get("Website"), row.get("Emails"))
+
+# Single-place reviews / photos (run sequentially — one in-flight job per user)
+reviews = client.scrape_reviews("https://maps.google.com/?cid=…")
+photos = client.scrape_photos("ChIJ…")  # Place ID, URL, or business_id
 ```
 
 CLI:
@@ -95,6 +99,22 @@ Paginated place rows as `{ column_header: string }` objects. Follow `nextCursor`
 
 High-level Google Maps extractor: creates a job, polls to a terminal status, then returns **all** result rows.
 
+### `create_reviews_job(place)` / `get_reviews_job(job_id)` / `get_reviews_results(job_id, *, limit=100, cursor=None)`
+
+Single-place reviews job. `place` is a Maps URL or `business_id`.
+
+### `scrape_reviews(place, *, poll_interval_ms=2000, timeout_ms=600_000, result_limit=100)`
+
+Create reviews job → poll → all review rows.
+
+### `create_photos_job(place)` / `get_photos_job(job_id)` / `get_photos_results(job_id, *, limit=100, cursor=None)`
+
+Single-place photos job. `place` is a Maps URL, `business_id`, or Place ID.
+
+### `scrape_photos(place, *, poll_interval_ms=2000, timeout_ms=600_000, result_limit=100)`
+
+Create photos job → poll → all photo rows.
+
 ## CLI reference
 
 ```bash
@@ -122,8 +142,8 @@ python -m gmaps_scraper.cli scrape "coffee shops in Austin TX" --out leads.csv
 
 ## Limits
 
-- Exactly **one keyword** per API job.
-- Only **one running job** per user at a time (web UI, HTTP API, and MCP share the lock) → `409` if busy. For multiple keywords, scrape **sequentially**.
+- Exactly **one keyword** per leads job; exactly **one place** per reviews or photos job.
+- Only **one running job** per user at a time (web UI, HTTP API, and MCP share the lock) → `409` if busy. For multiple keywords or places, scrape **sequentially**.
 - **1 credit = 1 place row**; enrich is included.
 - Agent API requires **Growth** or higher.
 - Empty email/social cells mean nothing public was found — contacts are never invented.

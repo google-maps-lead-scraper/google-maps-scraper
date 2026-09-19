@@ -20,9 +20,9 @@
 [![Ruby 3.1+](https://img.shields.io/badge/ruby-3.1+-CC342D.svg)](ruby/)
 [![.NET 8+](https://img.shields.io/badge/.NET-8+-512BD4.svg)](dotnet/)
 
-Official open-source **Python + TypeScript + Go + Rust + PHP + Ruby + .NET** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps places (name, phone, website, emails, and more) through the hosted Agent HTTP API / Remote MCP.
+Official open-source **Python + TypeScript + Go + Rust + PHP + Ruby + .NET** client kit for [GMaps Lead Finder](https://gmapsleadfinder.com) — scrape Google Maps **leads**, **reviews**, and **photos** through the hosted Agent HTTP API / Remote MCP.
 
-This repo does **not** run a local browser crawler. It calls the same cloud scrape-and-enrich pipeline as the Online Lead Extractor.
+This repo does **not** run a local browser crawler. It calls the same cloud scrape-and-enrich pipeline as the Online Lead Extractor. Reviews/photos helpers take a single place (Maps URL, `business_id`, or Place ID for photos); see [docs/http-api.md](docs/http-api.md).
 
 ## Get an API key
 
@@ -53,6 +53,8 @@ from gmaps_scraper import Client
 client = Client()  # reads GMF_API_KEY
 rows = client.scrape("dentists in Austin TX")
 print(len(rows), rows[0] if rows else None)
+# reviews = client.scrape_reviews("<place url or business_id>")
+# photos = client.scrape_photos("<place url, business_id, or Place ID>")
 ```
 
 ### TypeScript / Node
@@ -69,12 +71,14 @@ import { Client } from "@gmapsleadfinder/google-maps-scraper";
 const client = new Client(); // reads GMF_API_KEY
 const rows = await client.scrape("dentists in Austin TX");
 console.log(rows.length, rows[0]);
+// const reviews = await client.scrapeReviews("<place url or business_id>");
+// const photos = await client.scrapePhotos("<place url, business_id, or Place ID>");
 ```
 
 ### Go
 
 ```bash
-go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 ```
 
 ```go
@@ -83,6 +87,8 @@ import gmaps "github.com/google-maps-lead-scraper/google-maps-scraper/go"
 client, _ := gmaps.NewClient(nil) // reads GMF_API_KEY
 rows, _ := client.Scrape("dentists in Austin TX", nil)
 fmt.Println(len(rows), rows[0])
+// reviews, _ := client.ScrapeReviews("<place>", nil)
+// photos, _ := client.ScrapePhotos("<place>", nil)
 ```
 
 ```bash
@@ -102,6 +108,8 @@ use google_maps_scraper_sdk::{Client, ClientOptions};
 let client = Client::new(ClientOptions::default())?; // reads GMF_API_KEY
 let rows = client.scrape("dentists in Austin TX", Default::default())?;
 println!("{} {:?}", rows.len(), rows.first());
+// let reviews = client.scrape_reviews("<place>", Default::default())?;
+// let photos = client.scrape_photos("<place>", Default::default())?;
 ```
 
 ### PHP
@@ -118,6 +126,8 @@ use GmapsLeadFinder\GoogleMapsScraper\Client;
 $client = new Client(); // reads GMF_API_KEY
 $rows = $client->scrape("dentists in Austin TX");
 echo count($rows), "\n";
+// $reviews = $client->scrapeReviews("<place>");
+// $photos = $client->scrapePhotos("<place>");
 ```
 
 Source: [google-maps-scraper-php](https://github.com/google-maps-lead-scraper/google-maps-scraper-php) (Packagist: `gmapsleadfinder/google-maps-scraper`).
@@ -137,6 +147,8 @@ require "gmaps_scraper"
 client = GmapsScraper::Client.new # reads GMF_API_KEY
 rows = client.scrape("dentists in Austin TX")
 puts rows.length
+# reviews = client.scrape_reviews("<place>")
+# photos = client.scrape_photos("<place>")
 ```
 
 ### .NET
@@ -154,6 +166,8 @@ using GmapsLeadFinder.GoogleMapsScraper;
 using var client = new Client(); // reads GMF_API_KEY
 var rows = await client.ScrapeAsync("dentists in Austin TX");
 Console.WriteLine(rows.Count);
+// var reviews = await client.ScrapeReviewsAsync("<place>");
+// var photos = await client.ScrapePhotosAsync("<place>");
 ```
 
 > Python, npm, Rust, PHP, Ruby, and .NET CLIs may all be named `gmaps-scraper`. Prefer `npx` / `python -m gmaps_scraper` / `go run ./cli` / `cargo run --bin gmaps-scraper` / `vendor/bin/gmaps-scraper` / `bundle exec gmaps-scraper` / `dotnet tool` if you install more than one.
@@ -207,11 +221,11 @@ claude mcp add --transport http gmaps-finder https://gmapsleadfinder.com/mcp \
 }
 ```
 
-MCP tools: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`. Details: [docs/mcp.md](docs/mcp.md).
+MCP tools: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`, `gmaps_create_reviews_job`, `gmaps_get_reviews_job`, `gmaps_get_reviews_results`, `gmaps_create_photos_job`, `gmaps_get_photos_job`, `gmaps_get_photos_results`. Details: [docs/mcp.md](docs/mcp.md).
 
 ## Limits (read before batching)
 
-- **Exactly one keyword per API job**
+- **Exactly one keyword per leads job**; **exactly one place per reviews or photos job**
 - **One running job per user** at a time (web + API + MCP share the lock) → HTTP `409` if busy
 - **1 credit = 1 place row**; enrich is included
 - Agent HTTP/MCP requires **Growth+**

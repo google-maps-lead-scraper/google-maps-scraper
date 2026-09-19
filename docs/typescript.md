@@ -43,6 +43,10 @@ const rows = await client.scrape("dentists in Austin TX");
 for (const row of rows.slice(0, 5)) {
   console.log(row.Name, row.Phone, row.Website);
 }
+
+// Single-place reviews / photos (run sequentially)
+const reviews = await client.scrapeReviews("https://maps.google.com/?cid=…");
+const photos = await client.scrapePhotos("ChIJ…"); // Place ID, URL, or business_id
 ```
 
 ### Low-level methods
@@ -51,9 +55,13 @@ for (const row of rows.slice(0, 5)) {
 const created = await client.createJob("dentists in Austin TX");
 const job = await client.getJob(created.jobId);
 const page = await client.getResults(created.jobId, { limit: 100, cursor: "0" });
+
+// Reviews / photos
+const r = await client.createReviewsJob("https://maps.google.com/?cid=…");
+const p = await client.createPhotosJob("ChIJ…");
 ```
 
-`scrape()` options: `pollIntervalMs` (default `2000`), `timeoutMs` (default `600_000`), `resultLimit` (default `100`).
+`scrape()` / `scrapeReviews()` / `scrapePhotos()` options: `pollIntervalMs` (default `2000`), `timeoutMs` (default `600_000`), `resultLimit` (default `100`).
 
 ## CLI
 

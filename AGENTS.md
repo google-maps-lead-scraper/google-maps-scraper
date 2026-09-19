@@ -19,7 +19,7 @@ pip install google-maps-scraper-sdk
 npm install @gmapsleadfinder/google-maps-scraper
 # import: import { Client } from "@gmapsleadfinder/google-maps-scraper"
 
-go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 # first: go mod init … ; import gmaps "github.com/…/go"
 
 cargo add google-maps-scraper-sdk

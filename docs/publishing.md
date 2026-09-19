@@ -1,6 +1,6 @@
 # Publishing (maintainers)
 
-This monorepo ships six client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.1**).
+This monorepo ships six client packages; **PHP** lives in a separate repo. Keep versions aligned when releasing together (currently **0.1.2**).
 
 | Ecosystem | Package / module | Source directory |
 |-----------|------------------|------------------|
@@ -66,16 +66,16 @@ twine upload dist/*
 Go has **no** package upload. Publish by pushing a **subdirectory module tag**:
 
 ```bash
-git tag go/v0.1.1
-git push origin go/v0.1.1
-GOPROXY=https://proxy.golang.org go list -m github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+git tag go/v0.1.2
+git push origin go/v0.1.2
+GOPROXY=https://proxy.golang.org go list -m github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 ```
 
 Library install (inside a module):
 
 ```bash
 go mod init example.com/app
-go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 ```
 
 Do **not** `go install` the library path (`package gmaps` is not `main`). Use `go run ./cli` from the repo for the CLI.
@@ -114,8 +114,8 @@ No git subtree — edit and release only in that repo.
 ```bash
 cd /path/to/google-maps-scraper-php
 # bump version in composer.json + User-Agent if needed
-git add -A && git commit -m "Release v0.1.1"
-git tag v0.1.1
+git add -A && git commit -m "Release v0.1.2"
+git tag v0.1.2
 git push origin main --tags
 ```
 
@@ -128,7 +128,7 @@ First-time Packagist:
 Users:
 
 ```bash
-composer require gmapsleadfinder/google-maps-scraper:^0.1.1
+composer require gmapsleadfinder/google-maps-scraper:^0.1.2
 ```
 
 ## RubyGems (`google-maps-scraper-sdk`)
@@ -140,7 +140,7 @@ composer require gmapsleadfinder/google-maps-scraper:^0.1.1
 ```bash
 cd ruby
 gem build google-maps-scraper-sdk.gemspec
-gem push google-maps-scraper-sdk-0.1.1.gem
+gem push google-maps-scraper-sdk-0.1.2.gem
 ```
 
 Users:

@@ -2,6 +2,7 @@
 
 > Official open-source Python + TypeScript + Go + Rust + PHP + Ruby + .NET client for the GMaps Lead Finder hosted Agent API.
 > Not a local browser scraper. Auth: Bearer gmf_… key. Env: GMF_API_KEY.
+> Supports leads (keyword), reviews (single place), and photos (single place).
 
 ## Links
 
@@ -25,12 +26,19 @@
 - POST /api/v1/jobs — body {"keyword":"..."} (exactly one keyword)
 - GET /api/v1/jobs/{id} — poll status
 - GET /api/v1/jobs/{id}/results?limit=&cursor= — paginated rows; follow nextCursor
-- POST /mcp — Remote MCP (Streamable HTTP); tools gmaps_me, gmaps_create_job, gmaps_get_job, gmaps_get_results
+- POST /api/v1/review-jobs — body {"place":"<url or business_id>"} (exactly one place)
+- GET /api/v1/review-jobs/{id} — poll reviews status
+- GET /api/v1/review-jobs/{id}/results?limit=&cursor= — paginated review rows
+- POST /api/v1/photo-jobs — body {"place":"<url, business_id, or Place ID>"} (exactly one place)
+- GET /api/v1/photo-jobs/{id} — poll photos status
+- GET /api/v1/photo-jobs/{id}/results?limit=&cursor= — paginated photo rows
+- POST /mcp — Remote MCP (Streamable HTTP); tools gmaps_me, gmaps_create_job, gmaps_get_job, gmaps_get_results, gmaps_create_reviews_job, gmaps_get_reviews_job, gmaps_get_reviews_results, gmaps_create_photos_job, gmaps_get_photos_job, gmaps_get_photos_results
 
 ## Limits
 
 - Growth plan or higher required for Agent API/MCP
 - One running job per user (HTTP 409 if busy)
+- Exactly one keyword per leads job; exactly one place per reviews or photos job
 - 1 credit = 1 place row
 - Results limit 1–500 (default 100)
 
@@ -38,7 +46,7 @@
 
 - Install Python: `pip install google-maps-scraper-sdk` (import `gmaps_scraper`)
 - Install TypeScript: `npm install @gmapsleadfinder/google-maps-scraper`
-- Install Go: inside a module, `go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1`
+- Install Go: inside a module, `go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2`
 - Install Rust: `cargo add google-maps-scraper-sdk` (path `google_maps_scraper_sdk`)
 - Install PHP: `composer require gmapsleadfinder/google-maps-scraper` (namespace `GmapsLeadFinder\GoogleMapsScraper`)
 - Install Ruby: `gem install google-maps-scraper-sdk` (require `gmaps_scraper` → `GmapsScraper::Client`)
@@ -48,5 +56,5 @@
 - Packagist: https://packagist.org/packages/gmapsleadfinder/google-maps-scraper
 - RubyGems: https://rubygems.org/gems/google-maps-scraper-sdk
 - NuGet: https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper
-- High-level helper: scrape/Scrape/ScrapeAsync creates job, polls, returns all rows
+- High-level helpers: scrape/Scrape/ScrapeAsync (leads); scrape_reviews/scrapeReviews/ScrapeReviews/ScrapeReviewsAsync; scrape_photos/scrapePhotos/ScrapePhotos/ScrapePhotosAsync
 - Maintainer publish guide: /docs/publishing.md

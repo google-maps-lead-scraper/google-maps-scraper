@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-Go SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+Go SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **Module:** [`github.com/google-maps-lead-scraper/google-maps-scraper/go`](https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go)
 - **Import:** `gmaps "github.com/google-maps-lead-scraper/google-maps-scraper/go"`
@@ -25,7 +25,7 @@ export GMF_API_KEY=gmf_your_key_here
 ## Install
 
 ```bash
-go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+go get github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 ```
 
 Requires **Go 1.22+**. Standard library only.
@@ -59,6 +59,17 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(len(rows), rows[0])
+
+	// Single-place reviews / photos (run sequentially — one in-flight job per user)
+	reviews, err := client.ScrapeReviews("https://maps.google.com/?cid=…", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	photos, err := client.ScrapePhotos("ChIJ…", nil) // Place ID, URL, or business_id
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(len(reviews), len(photos))
 }
 ```
 
@@ -76,10 +87,18 @@ go run ./cli scrape "dentists in Austin TX" --out leads.json
 |--------|-------------|
 | `NewClient(opts)` | Build client from env / options |
 | `Me()` | Plan & credits |
-| `CreateJob(keyword)` | Queue one-keyword job |
-| `GetJob(jobID)` | Poll status |
-| `GetResults(jobID, opts)` | Paginated rows (`Limit`, `Cursor`) |
-| `Scrape(keyword, opts)` | Create → poll → all rows |
+| `CreateJob(keyword)` | Queue one-keyword leads job |
+| `GetJob(jobID)` | Poll leads status |
+| `GetResults(jobID, opts)` | Paginated leads rows (`Limit`, `Cursor`) |
+| `Scrape(keyword, opts)` | Create → poll → all leads rows |
+| `CreateReviewsJob(place)` | Queue single-place reviews job |
+| `GetReviewsJob(jobID)` | Poll reviews status |
+| `GetReviewsResults(jobID, opts)` | Paginated review rows |
+| `ScrapeReviews(place, opts)` | Create → poll → all review rows |
+| `CreatePhotosJob(place)` | Queue single-place photos job |
+| `GetPhotosJob(jobID)` | Poll photos status |
+| `GetPhotosResults(jobID, opts)` | Paginated photo rows |
+| `ScrapePhotos(place, opts)` | Create → poll → all photo rows |
 
 `ScrapeOptions`: `PollIntervalMs` (default 2000), `TimeoutMs` (default 600000), `ResultLimit` (default 100).
 
@@ -89,8 +108,8 @@ Typed errors: `AuthenticationError` (401), `PlanNotAllowedError` (403), `Insuffi
 
 ## Limits
 
-- Exactly one keyword per API job
-- One running job per user (`409` if busy)
+- Exactly one keyword per leads job; exactly one place per reviews or photos job
+- One running job per user (`409` if busy); run keywords/places sequentially
 - 1 credit = 1 place row; Growth+ required
 
 ## Publish to pkg.go.dev
@@ -98,12 +117,12 @@ Typed errors: `AuthenticationError` (401), `PlanNotAllowedError` (403), `Insuffi
 Go modules are published via **Git tags** (no separate upload):
 
 ```bash
-git tag go/v0.1.1
-git push origin go/v0.1.1
-GOPROXY=https://proxy.golang.org go list -m github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+git tag go/v0.1.2
+git push origin go/v0.1.2
+GOPROXY=https://proxy.golang.org go list -m github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 ```
 
-Then open: https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.1
+Then open: https://pkg.go.dev/github.com/google-maps-lead-scraper/google-maps-scraper/go@v0.1.2
 
 ## Links
 

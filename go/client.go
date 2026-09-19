@@ -18,7 +18,7 @@ const (
 	DefaultTimeoutMs      = 600_000
 	DefaultResultLimit    = 100
 	DefaultHTTPTimeoutMs  = 60_000
-	userAgent             = "gmaps-scraper-go/0.1.1"
+	userAgent             = "gmaps-scraper-go/0.1.2"
 )
 
 // Client talks to the GMaps Lead Finder Agent HTTP API.

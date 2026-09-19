@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-Ruby SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+Ruby SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **RubyGems:** [`google-maps-scraper-sdk`](https://rubygems.org/gems/google-maps-scraper-sdk)
 - **Require:** `gmaps_scraper` → `GmapsScraper::Client`
@@ -42,6 +42,11 @@ puts "#{me['plan']} #{me['creditsRemaining']}"
 
 rows = client.scrape("dentists in Austin TX")
 puts rows.length
+
+# Single-place reviews / photos (run sequentially — one in-flight job per user)
+reviews = client.scrape_reviews("https://maps.google.com/?cid=…")
+photos = client.scrape_photos("ChIJ…") # Place ID, URL, or business_id
+puts reviews.length, photos.length
 ```
 
 CLI:
@@ -65,12 +70,20 @@ bundle exec gmaps-scraper me
 |--------|-------------|
 | `Client.new(api_key:, base_url:, timeout_s:)` | From env / kwargs |
 | `me` | Plan & credits |
-| `create_job(keyword)` | Queue one-keyword job |
-| `get_job(job_id)` | Poll status |
-| `get_results(job_id, limit:, cursor:)` | Paginated rows |
-| `scrape(keyword, poll_interval_ms:, timeout_ms:, result_limit:)` | Create → poll → all rows |
+| `create_job(keyword)` | Queue one-keyword leads job |
+| `get_job(job_id)` | Poll leads status |
+| `get_results(job_id, limit:, cursor:)` | Paginated leads rows |
+| `scrape(keyword, poll_interval_ms:, timeout_ms:, result_limit:)` | Create → poll → all leads rows |
+| `create_reviews_job(place)` | Queue single-place reviews job |
+| `get_reviews_job(job_id)` | Poll reviews status |
+| `get_reviews_results(job_id, limit:, cursor:)` | Paginated review rows |
+| `scrape_reviews(place, …)` | Create → poll → all review rows |
+| `create_photos_job(place)` | Queue single-place photos job |
+| `get_photos_job(job_id)` | Poll photos status |
+| `get_photos_results(job_id, limit:, cursor:)` | Paginated photo rows |
+| `scrape_photos(place, …)` | Create → poll → all photo rows |
 
-`scrape` defaults: `poll_interval_ms` 2000, `timeout_ms` 600000, `result_limit` 100.
+`scrape` / `scrape_reviews` / `scrape_photos` defaults: `poll_interval_ms` 2000, `timeout_ms` 600000, `result_limit` 100.
 
 ## Errors
 
@@ -86,8 +99,8 @@ bundle exec gmaps-scraper me
 
 ## Limits
 
-- Exactly one keyword per API job
-- One running job per user (`409` if busy)
+- Exactly one keyword per leads job; exactly one place per reviews or photos job
+- One running job per user (`409` if busy); run keywords/places sequentially
 - 1 credit = 1 place row; Growth+ required
 
 ## Publish to RubyGems
@@ -95,7 +108,7 @@ bundle exec gmaps-scraper me
 ```bash
 cd ruby
 gem build google-maps-scraper-sdk.gemspec
-gem push google-maps-scraper-sdk-0.1.1.gem
+gem push google-maps-scraper-sdk-0.1.2.gem
 ```
 
 ## Links

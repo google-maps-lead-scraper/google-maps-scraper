@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-09-19
+
+### Added
+
+- Documented reviews / photos Client API across all SDK READMEs, `docs/python.md`, `docs/typescript.md`, root README, and `llms.txt`
+
+### Fixed
+
+- TypeScript `fetchAllRows` TS7022 (`page` needed explicit `ResultsResponse` annotation) blocking `npm publish`
+
+### Changed
+
+- Aligned all SDK package versions to `0.1.2` (npm, PyPI, Go tag `go/v0.1.2`, crates.io, RubyGems, NuGet, PHP `v0.1.2`)
+
 ## [0.1.1] - 2026-09-16
 
 ### Added

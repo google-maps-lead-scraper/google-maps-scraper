@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-.NET SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+.NET SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **NuGet:** [`GmapsLeadFinder.GoogleMapsScraper`](https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper)
 - **CLI tool:** [`GmapsLeadFinder.GoogleMapsScraper.Cli`](https://www.nuget.org/packages/GmapsLeadFinder.GoogleMapsScraper.Cli) (`gmaps-scraper`)
@@ -42,6 +42,11 @@ Console.WriteLine($"{me.GetProperty("plan")} {me.GetProperty("creditsRemaining")
 
 var rows = await client.ScrapeAsync("dentists in Austin TX");
 Console.WriteLine(rows.Count);
+
+// Single-place reviews / photos (run sequentially — one in-flight job per user)
+var reviews = await client.ScrapeReviewsAsync("https://maps.google.com/?cid=…");
+var photos = await client.ScrapePhotosAsync("ChIJ…"); // Place ID, URL, or business_id
+Console.WriteLine($"{reviews.Count} {photos.Count}");
 ```
 
 CLI:
@@ -64,10 +69,18 @@ dotnet run --project src/GmapsLeadFinder.GoogleMapsScraper.Cli -- me
 |--------|-------------|
 | `new Client(options?)` | From env / `ApiKey` / `BaseUrl` / `Timeout` |
 | `MeAsync()` | Plan & credits (`JsonElement`) |
-| `CreateJobAsync(keyword)` | Queue one-keyword job |
-| `GetJobAsync(jobId)` | Poll status |
-| `GetResultsAsync(jobId, options?)` | Paginated rows (`Limit`, `Cursor`) |
-| `ScrapeAsync(keyword, options?)` | Create → poll → all rows |
+| `CreateJobAsync(keyword)` | Queue one-keyword leads job |
+| `GetJobAsync(jobId)` | Poll leads status |
+| `GetResultsAsync(jobId, options?)` | Paginated leads rows (`Limit`, `Cursor`) |
+| `ScrapeAsync(keyword, options?)` | Create → poll → all leads rows |
+| `CreateReviewsJobAsync(place)` | Queue single-place reviews job |
+| `GetReviewsJobAsync(jobId)` | Poll reviews status |
+| `GetReviewsResultsAsync(jobId, options?)` | Paginated review rows |
+| `ScrapeReviewsAsync(place, options?)` | Create → poll → all review rows |
+| `CreatePhotosJobAsync(place)` | Queue single-place photos job |
+| `GetPhotosJobAsync(jobId)` | Poll photos status |
+| `GetPhotosResultsAsync(jobId, options?)` | Paginated photo rows |
+| `ScrapePhotosAsync(place, options?)` | Create → poll → all photo rows |
 
 `ScrapeOptions`: `PollIntervalMs` (2000), `TimeoutMs` (600000), `ResultLimit` (100).
 
@@ -87,8 +100,8 @@ All under `GmapsLeadFinder.GoogleMapsScraper.Exceptions`.
 
 ## Limits
 
-- Exactly one keyword per API job
-- One running job per user (`409` if busy)
+- Exactly one keyword per leads job; exactly one place per reviews or photos job
+- One running job per user (`409` if busy); run keywords/places sequentially
 - 1 credit = 1 place row; Growth+ required
 
 ## Publish to NuGet

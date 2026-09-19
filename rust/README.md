@@ -6,7 +6,7 @@
 
 **Google Maps Extractor · Google Maps Lead Scraper · Google Maps Lead Extractor**
 
-Rust SDK to scrape Google Maps places and export leads (name, phone, website, emails, and more) through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
+Rust SDK to scrape Google Maps places (leads), **reviews**, and **photos** through a hosted Agent HTTP API. Powered by [GMaps Lead Finder](https://gmapsleadfinder.com). This is **not** a local browser crawler — jobs run in the cloud scrape-and-enrich pipeline.
 
 - **crates.io:** [`google-maps-scraper-sdk`](https://crates.io/crates/google-maps-scraper-sdk)
 - **docs.rs:** https://docs.rs/google-maps-scraper-sdk
@@ -43,6 +43,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let rows = client.scrape("dentists in Austin TX", Default::default())?;
     println!("{} {:?}", rows.len(), rows.first());
+
+    // Single-place reviews / photos (run sequentially — one in-flight job per user)
+    let reviews = client.scrape_reviews("https://maps.google.com/?cid=…", Default::default())?;
+    let photos = client.scrape_photos("ChIJ…", Default::default())?; // Place ID, URL, or business_id
+    println!("{} {}", reviews.len(), photos.len());
     Ok(())
 }
 ```
@@ -69,10 +74,18 @@ cargo run --bin gmaps-scraper -- me
 |--------|-------------|
 | `Client::new(opts)` | From env / options |
 | `me()` | Plan & credits |
-| `create_job(keyword)` | Queue one-keyword job |
-| `get_job(job_id)` | Poll status |
-| `get_results(job_id, opts)` | Paginated rows |
-| `scrape(keyword, opts)` | Create → poll → all rows |
+| `create_job(keyword)` | Queue one-keyword leads job |
+| `get_job(job_id)` | Poll leads status |
+| `get_results(job_id, opts)` | Paginated leads rows |
+| `scrape(keyword, opts)` | Create → poll → all leads rows |
+| `create_reviews_job(place)` | Queue single-place reviews job |
+| `get_reviews_job(job_id)` | Poll reviews status |
+| `get_reviews_results(job_id, opts)` | Paginated review rows |
+| `scrape_reviews(place, opts)` | Create → poll → all review rows |
+| `create_photos_job(place)` | Queue single-place photos job |
+| `get_photos_job(job_id)` | Poll photos status |
+| `get_photos_results(job_id, opts)` | Paginated photo rows |
+| `scrape_photos(place, opts)` | Create → poll → all photo rows |
 
 ## Errors
 
@@ -80,8 +93,8 @@ cargo run --bin gmaps-scraper -- me
 
 ## Limits
 
-- Exactly one keyword per API job
-- One running job per user (`409` if busy)
+- Exactly one keyword per leads job; exactly one place per reviews or photos job
+- One running job per user (`409` if busy); run keywords/places sequentially
 - 1 credit = 1 place row; Growth+ required
 
 ## Publish to crates.io
