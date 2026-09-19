@@ -44,7 +44,7 @@ dotnet add package GmapsLeadFinder.GoogleMapsScraper
 | User is in Claude / Cursor / Codex with MCP support | **Remote MCP** at `https://gmapsleadfinder.com/mcp` |
 | Scripts, CI, custom apps | **HTTP** via Python/TS/Go/Rust/PHP/Ruby/.NET SDK or raw `fetch`/`curl` |
 
-MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`.
+MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gmaps_get_results`, `gmaps_create_reviews_job`, `gmaps_get_reviews_job`, `gmaps_get_reviews_results`, `gmaps_create_photos_job`, `gmaps_get_photos_job`, `gmaps_get_photos_results`.
 
 ## API key rules
 
@@ -61,16 +61,34 @@ MCP tools map 1:1 to HTTP: `gmaps_me`, `gmaps_create_job`, `gmaps_get_job`, `gma
 
 Or use SDK helpers: `scrape` / `Scrape` / `ScrapeAsync` (Python / TypeScript / Go / Rust / PHP / Ruby / .NET) which polls and paginates.
 
+## Reviews HTTP workflow
+
+1. `GET /api/v1/me` — confirm credits.
+2. `POST /api/v1/review-jobs` with `{ "place": "<url or business_id>" }` → `jobId`.
+3. Poll `GET /api/v1/review-jobs/{id}` until `completed`, `partial`, or `failed`.
+4. `GET /api/v1/review-jobs/{id}/results?limit=100` and follow `nextCursor` until `null`.
+
+Or use SDK helpers: `scrapeReviews` / `scrape_reviews` / `ScrapeReviews` / `ScrapeReviewsAsync`.
+
+## Photos HTTP workflow
+
+1. `GET /api/v1/me` — confirm credits.
+2. `POST /api/v1/photo-jobs` with `{ "place": "<url, business_id, or Place ID>" }` → `jobId`.
+3. Poll `GET /api/v1/photo-jobs/{id}` until `completed`, `partial`, or `failed`.
+4. `GET /api/v1/photo-jobs/{id}/results?limit=100` and follow `nextCursor` until `null`.
+
+Or use SDK helpers: `scrapePhotos` / `scrape_photos` / `ScrapePhotos` / `ScrapePhotosAsync`.
+
 ## Hard constraints
 
-- Exactly **one** keyword per job (multi-keyword → `400`).
-- Only **one** in-flight job per user (`409` if busy). For multiple keywords, run **sequentially** and wait for completion.
+- Exactly **one** keyword per leads job (multi-keyword → `400`); exactly **one** place per reviews or photos job.
+- Only **one** in-flight job per user (`409` if busy). For multiple keywords or places, run **sequentially** and wait for completion.
 - `402` = no credits; `403` = plan cannot use Agent API; `401` = bad/missing key.
 - Empty email/social fields mean nothing public was found — do not invent contacts.
 
 ## Result shape
 
-Rows are objects keyed by export column headers, e.g. `Name`, `Phone`, `Website`, `Emails` (exact set follows the user’s Leads export preferences).
+Rows are objects keyed by export column headers, e.g. `Name`, `Phone`, `Website`, `Emails` for leads (exact set follows the user’s Leads export preferences). Review rows follow the user’s Reviews export preferences.
 
 ## Canonical links
 

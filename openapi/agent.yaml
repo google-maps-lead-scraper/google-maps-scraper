@@ -127,6 +127,196 @@ paths:
           description: Missing or invalid API key
         "404":
           description: Job not found
+  /api/v1/review-jobs:
+    post:
+      summary: Create a single-place reviews scrape job
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [place]
+              properties:
+                place:
+                  type: string
+                  description: Google Maps place URL or business_id (0x…:0x…)
+      responses:
+        "200":
+          description: Reviews job queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateJobResponse"
+        "400":
+          description: Invalid place
+        "401":
+          description: Missing or invalid API key
+        "402":
+          description: No credits remaining
+        "403":
+          description: Plan cannot use agent API
+        "409":
+          description: Another job is already running
+  /api/v1/review-jobs/{id}:
+    get:
+      summary: Reviews job status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Reviews job metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewsJobResponse"
+        "400":
+          description: Not a reviews job
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
+  /api/v1/review-jobs/{id}/results:
+    get:
+      summary: Paginated review rows as JSON
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: cursor
+          in: query
+          description: Offset cursor from previous nextCursor
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Review rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultsResponse"
+        "400":
+          description: Not a reviews job
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
+  /api/v1/photo-jobs:
+    post:
+      summary: Create a single-place photos scrape job
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [place]
+              properties:
+                place:
+                  type: string
+                  description: Google Maps place URL, business_id (0x…:0x…), or Place ID (ChIJ…)
+      responses:
+        "200":
+          description: Photos job queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateJobResponse"
+        "400":
+          description: Invalid place
+        "401":
+          description: Missing or invalid API key
+        "402":
+          description: No credits remaining
+        "403":
+          description: Plan cannot use agent API
+        "409":
+          description: Another job is already running
+  /api/v1/photo-jobs/{id}:
+    get:
+      summary: Photos job status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Photos job metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhotosJobResponse"
+        "400":
+          description: Not a photos job
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
+  /api/v1/photo-jobs/{id}/results:
+    get:
+      summary: Paginated photo rows as JSON
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+        - name: cursor
+          in: query
+          description: Offset cursor from previous nextCursor
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Photo rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultsResponse"
+        "400":
+          description: Not a photos job
+        "401":
+          description: Missing or invalid API key
+        "404":
+          description: Job not found
 components:
   securitySchemes:
     bearerAuth:
@@ -184,6 +374,8 @@ components:
           type: string
         status:
           type: string
+        jobType:
+          type: string
         keywords:
           type: array
           items:
@@ -208,6 +400,78 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/JobFile"
+        creditsRemaining:
+          type: number
+    ReviewsJobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        jobType:
+          type: string
+          enum: [reviews]
+        places:
+          type: array
+          items:
+            type: string
+        placeCount:
+          type: integer
+        currentPlaceIndex:
+          type: integer
+        rowCount:
+          type: integer
+        error:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        files:
+          type: array
+          items:
+            type: object
+        creditsRemaining:
+          type: number
+    PhotosJobResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        jobType:
+          type: string
+          enum: [photos]
+        places:
+          type: array
+          items:
+            type: string
+        placeCount:
+          type: integer
+        currentPlaceIndex:
+          type: integer
+        rowCount:
+          type: integer
+        error:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        files:
+          type: array
+          items:
+            type: object
         creditsRemaining:
           type: number
     ResultsResponse:

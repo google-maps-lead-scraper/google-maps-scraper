@@ -110,6 +110,68 @@ export class Client {
     );
   }
 
+  createReviewsJob(place: string): Promise<CreateJobResponse> {
+    const trimmed = place?.trim();
+    if (!trimmed) {
+      throw new BadRequestError("place is required");
+    }
+    return this.request<CreateJobResponse>("POST", "/api/v1/review-jobs", {
+      jsonBody: { place: trimmed },
+    });
+  }
+
+  getReviewsJob(jobId: string): Promise<JobResponse> {
+    return this.request<JobResponse>("GET", `/api/v1/review-jobs/${jobId}`);
+  }
+
+  getReviewsResults(
+    jobId: string,
+    options: GetResultsOptions = {},
+  ): Promise<ResultsResponse> {
+    const query: Record<string, string> = {
+      limit: String(options.limit ?? DEFAULT_RESULT_LIMIT),
+    };
+    if (options.cursor !== undefined && options.cursor !== null) {
+      query.cursor = String(options.cursor);
+    }
+    return this.request<ResultsResponse>(
+      "GET",
+      `/api/v1/review-jobs/${jobId}/results`,
+      { query },
+    );
+  }
+
+  createPhotosJob(place: string): Promise<CreateJobResponse> {
+    const trimmed = place?.trim();
+    if (!trimmed) {
+      throw new BadRequestError("place is required");
+    }
+    return this.request<CreateJobResponse>("POST", "/api/v1/photo-jobs", {
+      jsonBody: { place: trimmed },
+    });
+  }
+
+  getPhotosJob(jobId: string): Promise<JobResponse> {
+    return this.request<JobResponse>("GET", `/api/v1/photo-jobs/${jobId}`);
+  }
+
+  getPhotosResults(
+    jobId: string,
+    options: GetResultsOptions = {},
+  ): Promise<ResultsResponse> {
+    const query: Record<string, string> = {
+      limit: String(options.limit ?? DEFAULT_RESULT_LIMIT),
+    };
+    if (options.cursor !== undefined && options.cursor !== null) {
+      query.cursor = String(options.cursor);
+    }
+    return this.request<ResultsResponse>(
+      "GET",
+      `/api/v1/photo-jobs/${jobId}/results`,
+      { query },
+    );
+  }
+
   async scrape(keyword: string, options: ScrapeOptions = {}): Promise<PlaceRow[]> {
     const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS;
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -117,16 +179,52 @@ export class Client {
 
     const created = await this.createJob(keyword);
     const jobId = created.jobId;
-    const deadline = Date.now() + timeoutMs;
+    await this.waitForJob(jobId, pollIntervalMs, timeoutMs, "maps");
+    return this.fetchAllRows(jobId, resultLimit, "maps");
+  }
 
+  async scrapeReviews(place: string, options: ScrapeOptions = {}): Promise<PlaceRow[]> {
+    const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS;
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    const resultLimit = options.resultLimit ?? DEFAULT_RESULT_LIMIT;
+
+    const created = await this.createReviewsJob(place);
+    const jobId = created.jobId;
+    await this.waitForJob(jobId, pollIntervalMs, timeoutMs, "reviews");
+    return this.fetchAllRows(jobId, resultLimit, "reviews");
+  }
+
+  async scrapePhotos(place: string, options: ScrapeOptions = {}): Promise<PlaceRow[]> {
+    const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_POLL_INTERVAL_MS;
+    const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    const resultLimit = options.resultLimit ?? DEFAULT_RESULT_LIMIT;
+
+    const created = await this.createPhotosJob(place);
+    const jobId = created.jobId;
+    await this.waitForJob(jobId, pollIntervalMs, timeoutMs, "photos");
+    return this.fetchAllRows(jobId, resultLimit, "photos");
+  }
+
+  private async waitForJob(
+    jobId: string,
+    pollIntervalMs: number,
+    timeoutMs: number,
+    kind: "maps" | "reviews" | "photos" = "maps",
+  ): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
     for (;;) {
-      const job = await this.getJob(jobId);
+      const job =
+        kind === "reviews"
+          ? await this.getReviewsJob(jobId)
+          : kind === "photos"
+            ? await this.getPhotosJob(jobId)
+            : await this.getJob(jobId);
       const status = (job.status ?? "").toLowerCase();
       if (TERMINAL_STATUSES.has(status)) {
         if (status === "failed") {
           throw new ApiError(job.error || `Job ${jobId} failed`, { body: job });
         }
-        break;
+        return;
       }
       if (Date.now() >= deadline) {
         throw new TimeoutError(
@@ -135,21 +233,22 @@ export class Client {
       }
       await sleep(Math.max(pollIntervalMs, 100));
     }
-
-    return this.fetchAllRows(jobId, resultLimit);
   }
 
   private async fetchAllRows(
     jobId: string,
     resultLimit: number,
+    kind: "maps" | "reviews" | "photos",
   ): Promise<PlaceRow[]> {
     const rows: PlaceRow[] = [];
     let cursor: string | null = "0";
     while (cursor !== null) {
-      const page = await this.getResults(jobId, {
-        limit: resultLimit,
-        cursor,
-      });
+      const page =
+        kind === "reviews"
+          ? await this.getReviewsResults(jobId, { limit: resultLimit, cursor })
+          : kind === "photos"
+            ? await this.getPhotosResults(jobId, { limit: resultLimit, cursor })
+            : await this.getResults(jobId, { limit: resultLimit, cursor });
       if (page.rows?.length) {
         rows.push(...page.rows);
       }

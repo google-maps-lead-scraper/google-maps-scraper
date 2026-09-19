@@ -106,21 +106,122 @@ impl Client {
         )
     }
 
+    pub fn create_reviews_job(&self, place: &str) -> Result<CreateJobResponse> {
+        let trimmed = place.trim();
+        if trimmed.is_empty() {
+            return Err(Error::BadRequest {
+                message: "place is required".into(),
+                status_code: None,
+                body: None,
+            });
+        }
+        self.request(
+            "POST",
+            "/api/v1/review-jobs",
+            Some(json!({ "place": trimmed })),
+            None,
+        )
+    }
+
+    pub fn get_reviews_job(&self, job_id: &str) -> Result<JobResponse> {
+        self.request("GET", &format!("/api/v1/review-jobs/{job_id}"), None, None)
+    }
+
+    pub fn get_reviews_results(
+        &self,
+        job_id: &str,
+        opts: GetResultsOptions,
+    ) -> Result<ResultsResponse> {
+        let limit = opts.limit.unwrap_or(DEFAULT_RESULT_LIMIT);
+        let mut query = vec![("limit".to_string(), limit.to_string())];
+        if let Some(cursor) = opts.cursor {
+            query.push(("cursor".to_string(), cursor));
+        }
+        self.request(
+            "GET",
+            &format!("/api/v1/review-jobs/{job_id}/results"),
+            None,
+            Some(query),
+        )
+    }
+
+    pub fn create_photos_job(&self, place: &str) -> Result<CreateJobResponse> {
+        let trimmed = place.trim();
+        if trimmed.is_empty() {
+            return Err(Error::BadRequest {
+                message: "place is required".into(),
+                status_code: None,
+                body: None,
+            });
+        }
+        self.request(
+            "POST",
+            "/api/v1/photo-jobs",
+            Some(json!({ "place": trimmed })),
+            None,
+        )
+    }
+
+    pub fn get_photos_job(&self, job_id: &str) -> Result<JobResponse> {
+        self.request("GET", &format!("/api/v1/photo-jobs/{job_id}"), None, None)
+    }
+
+    pub fn get_photos_results(
+        &self,
+        job_id: &str,
+        opts: GetResultsOptions,
+    ) -> Result<ResultsResponse> {
+        let limit = opts.limit.unwrap_or(DEFAULT_RESULT_LIMIT);
+        let mut query = vec![("limit".to_string(), limit.to_string())];
+        if let Some(cursor) = opts.cursor {
+            query.push(("cursor".to_string(), cursor));
+        }
+        self.request(
+            "GET",
+            &format!("/api/v1/photo-jobs/{job_id}/results"),
+            None,
+            Some(query),
+        )
+    }
+
     /// Create a job, poll until terminal, return all rows.
     pub fn scrape(&self, keyword: &str, opts: ScrapeOptions) -> Result<Vec<PlaceRow>> {
+        let result_limit = opts.result_limit.unwrap_or(DEFAULT_RESULT_LIMIT);
+        let created = self.create_job(keyword)?;
+        self.wait_for_job(&created.job_id, opts, "maps")?;
+        self.fetch_all_rows(&created.job_id, result_limit, "maps")
+    }
+
+    /// Create a reviews job, poll until terminal, return all review rows.
+    pub fn scrape_reviews(&self, place: &str, opts: ScrapeOptions) -> Result<Vec<PlaceRow>> {
+        let result_limit = opts.result_limit.unwrap_or(DEFAULT_RESULT_LIMIT);
+        let created = self.create_reviews_job(place)?;
+        self.wait_for_job(&created.job_id, opts, "reviews")?;
+        self.fetch_all_rows(&created.job_id, result_limit, "reviews")
+    }
+
+    /// Create a photos job, poll until terminal, return all photo rows.
+    pub fn scrape_photos(&self, place: &str, opts: ScrapeOptions) -> Result<Vec<PlaceRow>> {
+        let result_limit = opts.result_limit.unwrap_or(DEFAULT_RESULT_LIMIT);
+        let created = self.create_photos_job(place)?;
+        self.wait_for_job(&created.job_id, opts, "photos")?;
+        self.fetch_all_rows(&created.job_id, result_limit, "photos")
+    }
+
+    fn wait_for_job(&self, job_id: &str, opts: ScrapeOptions, kind: &str) -> Result<()> {
         let poll_ms = opts
             .poll_interval_ms
             .unwrap_or(DEFAULT_POLL_INTERVAL_MS)
             .max(100);
         let timeout_ms = opts.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS);
-        let result_limit = opts.result_limit.unwrap_or(DEFAULT_RESULT_LIMIT);
-
-        let created = self.create_job(keyword)?;
-        let job_id = created.job_id;
         let deadline = Instant::now() + Duration::from_millis(timeout_ms);
 
         loop {
-            let job = self.get_job(&job_id)?;
+            let job = match kind {
+                "reviews" => self.get_reviews_job(job_id)?,
+                "photos" => self.get_photos_job(job_id)?,
+                _ => self.get_job(job_id)?,
+            };
             let status = job.status.clone().unwrap_or_default();
             if is_terminal_status(&status) {
                 if status.eq_ignore_ascii_case("failed") {
@@ -133,7 +234,7 @@ impl Client {
                         body: None,
                     });
                 }
-                break;
+                return Ok(());
             }
             if Instant::now() >= deadline {
                 return Err(Error::Timeout {
@@ -144,21 +245,26 @@ impl Client {
             }
             thread::sleep(Duration::from_millis(poll_ms));
         }
-
-        self.fetch_all_rows(&job_id, result_limit)
     }
 
-    fn fetch_all_rows(&self, job_id: &str, result_limit: u32) -> Result<Vec<PlaceRow>> {
+    fn fetch_all_rows(
+        &self,
+        job_id: &str,
+        result_limit: u32,
+        kind: &str,
+    ) -> Result<Vec<PlaceRow>> {
         let mut rows = Vec::new();
         let mut cursor = Some("0".to_string());
         while let Some(c) = cursor {
-            let page = self.get_results(
-                job_id,
-                GetResultsOptions {
-                    limit: Some(result_limit),
-                    cursor: Some(c),
-                },
-            )?;
+            let opts = GetResultsOptions {
+                limit: Some(result_limit),
+                cursor: Some(c),
+            };
+            let page = match kind {
+                "reviews" => self.get_reviews_results(job_id, opts)?,
+                "photos" => self.get_photos_results(job_id, opts)?,
+                _ => self.get_results(job_id, opts)?,
+            };
             if let Some(batch) = page.rows {
                 rows.extend(batch);
             }

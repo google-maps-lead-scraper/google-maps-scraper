@@ -46,7 +46,38 @@ Paginated rows. Query: `limit` (1–500, default 100), `cursor` (from previous `
 
 Follow `nextCursor` until it is `null`. Each row is `{ [columnHeader]: string }`.
 
+## Reviews endpoints
+
+Independent job type for scraping reviews from a single Google Maps place.
+
+### `POST /api/v1/review-jobs`
+
+Queue a single-place reviews scrape job.
+
+```bash
+curl -sS -X POST https://gmapsleadfinder.com/api/v1/review-jobs \
+  -H "Authorization: Bearer $GMF_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"place":"https://maps.google.com/?cid=1234567890"}'
+```
+
+`place` is a Google Maps place URL or `business_id` (`0x…:0x…`).
+
+Response includes `jobId`, `creditsRemaining`.
+
+### `GET /api/v1/review-jobs/{id}`
+
+Poll until `status` is `completed`, `partial`, or `failed`.
+
+### `GET /api/v1/review-jobs/{id}/results`
+
+Paginated review rows. Query: `limit` (1–500, default 100), `cursor` (from previous `nextCursor`).
+
+Follow `nextCursor` until it is `null`. Each row is `{ [columnHeader]: string }`.
+
 ## Typical workflow
+
+### Leads (keyword search)
 
 1. `GET /api/v1/me` — confirm credits.
 2. `POST /api/v1/jobs` — store `jobId`.
@@ -54,6 +85,53 @@ Follow `nextCursor` until it is `null`. Each row is `{ [columnHeader]: string }`
 4. Fetch all pages of `…/results`.
 
 SDKs expose the same flow via `Client.scrape()`.
+
+### Reviews (single place)
+
+1. `GET /api/v1/me` — confirm credits.
+2. `POST /api/v1/review-jobs` — store `jobId`.
+3. Poll `GET /api/v1/review-jobs/{id}`.
+4. Fetch all pages of `…/results`.
+
+SDKs expose the same flow via `Client.scrapeReviews()` / `scrape_reviews()` / `ScrapeReviews()`.
+
+## Photos endpoints
+
+Independent job type for scraping place photos from a single Google Maps place.
+
+### `POST /api/v1/photo-jobs`
+
+Queue a single-place photos scrape job.
+
+```bash
+curl -sS -X POST https://gmapsleadfinder.com/api/v1/photo-jobs \
+  -H "Authorization: Bearer $GMF_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"place":"ChIJN1t_tDeuEmsRUsoyG83frY4"}'
+```
+
+`place` is a Google Maps place URL, `business_id` (`0x…:0x…`), or Place ID (`ChIJ…`).
+
+Response includes `jobId`, `creditsRemaining`.
+
+### `GET /api/v1/photo-jobs/{id}`
+
+Poll until `status` is `completed`, `partial`, or `failed`.
+
+### `GET /api/v1/photo-jobs/{id}/results`
+
+Paginated photo rows. Query: `limit` (1–500, default 100), `cursor` (from previous `nextCursor`).
+
+Follow `nextCursor` until it is `null`. Each row is `{ [columnHeader]: string }`.
+
+### Photos (single place)
+
+1. `GET /api/v1/me` — confirm credits.
+2. `POST /api/v1/photo-jobs` — store `jobId`.
+3. Poll `GET /api/v1/photo-jobs/{id}`.
+4. Fetch all pages of `…/results`.
+
+SDKs expose the same flow via `Client.scrapePhotos()` / `scrape_photos()` / `ScrapePhotos()`.
 
 ## Errors & limits
 

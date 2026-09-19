@@ -109,22 +109,133 @@ public sealed class Client : IDisposable
             cancellationToken);
     }
 
+    public Task<JsonElement> CreateReviewsJobAsync(string place, CancellationToken cancellationToken = default)
+    {
+        var trimmed = place?.Trim() ?? "";
+        if (trimmed.Length == 0)
+        {
+            throw new BadRequestException("place is required");
+        }
+
+        var body = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, string> { ["place"] = trimmed });
+        return RequestAsync(HttpMethod.Post, "api/v1/review-jobs", body, null, cancellationToken);
+    }
+
+    public Task<JsonElement> GetReviewsJobAsync(string jobId, CancellationToken cancellationToken = default)
+        => RequestAsync(HttpMethod.Get, $"api/v1/review-jobs/{Uri.EscapeDataString(jobId)}", null, null, cancellationToken);
+
+    public Task<JsonElement> GetReviewsResultsAsync(
+        string jobId,
+        GetResultsOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        options ??= new GetResultsOptions();
+        var query = new Dictionary<string, string> { ["limit"] = options.Limit.ToString() };
+        if (options.Cursor is not null)
+        {
+            query["cursor"] = options.Cursor;
+        }
+
+        return RequestAsync(
+            HttpMethod.Get,
+            $"api/v1/review-jobs/{Uri.EscapeDataString(jobId)}/results",
+            null,
+            query,
+            cancellationToken);
+    }
+
+    public Task<JsonElement> CreatePhotosJobAsync(string place, CancellationToken cancellationToken = default)
+    {
+        var trimmed = place?.Trim() ?? "";
+        if (trimmed.Length == 0)
+        {
+            throw new BadRequestException("place is required");
+        }
+
+        var body = JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, string> { ["place"] = trimmed });
+        return RequestAsync(HttpMethod.Post, "api/v1/photo-jobs", body, null, cancellationToken);
+    }
+
+    public Task<JsonElement> GetPhotosJobAsync(string jobId, CancellationToken cancellationToken = default)
+        => RequestAsync(HttpMethod.Get, $"api/v1/photo-jobs/{Uri.EscapeDataString(jobId)}", null, null, cancellationToken);
+
+    public Task<JsonElement> GetPhotosResultsAsync(
+        string jobId,
+        GetResultsOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        options ??= new GetResultsOptions();
+        var query = new Dictionary<string, string> { ["limit"] = options.Limit.ToString() };
+        if (options.Cursor is not null)
+        {
+            query["cursor"] = options.Cursor;
+        }
+
+        return RequestAsync(
+            HttpMethod.Get,
+            $"api/v1/photo-jobs/{Uri.EscapeDataString(jobId)}/results",
+            null,
+            query,
+            cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Dictionary<string, string>>> ScrapeAsync(
         string keyword,
         ScrapeOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         options ??= new ScrapeOptions();
-        var pollMs = Math.Max(100, options.PollIntervalMs);
         var created = await CreateJobAsync(keyword, cancellationToken).ConfigureAwait(false);
         var jobId = created.GetProperty("jobId").GetString()
             ?? throw new ApiException("createJob response missing jobId", body: created.ToString());
+        await WaitForJobAsync(jobId, options, "maps", cancellationToken).ConfigureAwait(false);
+        return await FetchAllRowsAsync(jobId, options.ResultLimit, "maps", cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<Dictionary<string, string>>> ScrapeReviewsAsync(
+        string place,
+        ScrapeOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        options ??= new ScrapeOptions();
+        var created = await CreateReviewsJobAsync(place, cancellationToken).ConfigureAwait(false);
+        var jobId = created.GetProperty("jobId").GetString()
+            ?? throw new ApiException("createReviewsJob response missing jobId", body: created.ToString());
+        await WaitForJobAsync(jobId, options, "reviews", cancellationToken).ConfigureAwait(false);
+        return await FetchAllRowsAsync(jobId, options.ResultLimit, "reviews", cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<IReadOnlyList<Dictionary<string, string>>> ScrapePhotosAsync(
+        string place,
+        ScrapeOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        options ??= new ScrapeOptions();
+        var created = await CreatePhotosJobAsync(place, cancellationToken).ConfigureAwait(false);
+        var jobId = created.GetProperty("jobId").GetString()
+            ?? throw new ApiException("createPhotosJob response missing jobId", body: created.ToString());
+        await WaitForJobAsync(jobId, options, "photos", cancellationToken).ConfigureAwait(false);
+        return await FetchAllRowsAsync(jobId, options.ResultLimit, "photos", cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task WaitForJobAsync(
+        string jobId,
+        ScrapeOptions options,
+        string kind,
+        CancellationToken cancellationToken)
+    {
+        var pollMs = Math.Max(100, options.PollIntervalMs);
         var deadline = DateTime.UtcNow.AddMilliseconds(options.TimeoutMs);
 
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var job = await GetJobAsync(jobId, cancellationToken).ConfigureAwait(false);
+            var job = kind switch
+            {
+                "reviews" => await GetReviewsJobAsync(jobId, cancellationToken).ConfigureAwait(false),
+                "photos" => await GetPhotosJobAsync(jobId, cancellationToken).ConfigureAwait(false),
+                _ => await GetJobAsync(jobId, cancellationToken).ConfigureAwait(false),
+            };
             var status = job.TryGetProperty("status", out var statusEl)
                 ? statusEl.GetString()?.ToLowerInvariant() ?? ""
                 : "";
@@ -137,7 +248,7 @@ public sealed class Client : IDisposable
                     throw new ApiException(err ?? $"Job {jobId} failed", body: job.ToString());
                 }
 
-                break;
+                return;
             }
 
             if (DateTime.UtcNow >= deadline)
@@ -149,23 +260,33 @@ public sealed class Client : IDisposable
 
             await Task.Delay(pollMs, cancellationToken).ConfigureAwait(false);
         }
-
-        return await FetchAllRowsAsync(jobId, options.ResultLimit, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<IReadOnlyList<Dictionary<string, string>>> FetchAllRowsAsync(
         string jobId,
         int resultLimit,
+        string kind,
         CancellationToken cancellationToken)
     {
         var rows = new List<Dictionary<string, string>>();
         string? cursor = "0";
         while (cursor is not null)
         {
-            var page = await GetResultsAsync(
-                jobId,
-                new GetResultsOptions { Limit = resultLimit, Cursor = cursor },
-                cancellationToken).ConfigureAwait(false);
+            var page = kind switch
+            {
+                "reviews" => await GetReviewsResultsAsync(
+                    jobId,
+                    new GetResultsOptions { Limit = resultLimit, Cursor = cursor },
+                    cancellationToken).ConfigureAwait(false),
+                "photos" => await GetPhotosResultsAsync(
+                    jobId,
+                    new GetResultsOptions { Limit = resultLimit, Cursor = cursor },
+                    cancellationToken).ConfigureAwait(false),
+                _ => await GetResultsAsync(
+                    jobId,
+                    new GetResultsOptions { Limit = resultLimit, Cursor = cursor },
+                    cancellationToken).ConfigureAwait(false),
+            };
 
             if (page.TryGetProperty("rows", out var rowsEl) && rowsEl.ValueKind == JsonValueKind.Array)
             {

@@ -48,6 +48,40 @@ module GmapsScraper
       request("GET", "/api/v1/jobs/#{job_id}/results", query: query)
     end
 
+    def create_reviews_job(place)
+      trimmed = place.to_s.strip
+      raise BadRequestError, "place is required" if trimmed.empty?
+
+      request("POST", "/api/v1/review-jobs", json_body: { "place" => trimmed })
+    end
+
+    def get_reviews_job(job_id)
+      request("GET", "/api/v1/review-jobs/#{job_id}")
+    end
+
+    def get_reviews_results(job_id, limit: DEFAULT_RESULT_LIMIT, cursor: nil)
+      query = { "limit" => limit.to_s }
+      query["cursor"] = cursor.to_s unless cursor.nil?
+      request("GET", "/api/v1/review-jobs/#{job_id}/results", query: query)
+    end
+
+    def create_photos_job(place)
+      trimmed = place.to_s.strip
+      raise BadRequestError, "place is required" if trimmed.empty?
+
+      request("POST", "/api/v1/photo-jobs", json_body: { "place" => trimmed })
+    end
+
+    def get_photos_job(job_id)
+      request("GET", "/api/v1/photo-jobs/#{job_id}")
+    end
+
+    def get_photos_results(job_id, limit: DEFAULT_RESULT_LIMIT, cursor: nil)
+      query = { "limit" => limit.to_s }
+      query["cursor"] = cursor.to_s unless cursor.nil?
+      request("GET", "/api/v1/photo-jobs/#{job_id}/results", query: query)
+    end
+
     def scrape(
       keyword,
       poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
@@ -56,11 +90,46 @@ module GmapsScraper
     )
       created = create_job(keyword)
       job_id = created["jobId"].to_s
+      wait_for_job(job_id, poll_interval_ms: poll_interval_ms, timeout_ms: timeout_ms, kind: "maps")
+      fetch_all_rows(job_id, result_limit: result_limit, kind: "maps")
+    end
+
+    def scrape_reviews(
+      place,
+      poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
+      timeout_ms: DEFAULT_TIMEOUT_MS,
+      result_limit: DEFAULT_RESULT_LIMIT
+    )
+      created = create_reviews_job(place)
+      job_id = created["jobId"].to_s
+      wait_for_job(job_id, poll_interval_ms: poll_interval_ms, timeout_ms: timeout_ms, kind: "reviews")
+      fetch_all_rows(job_id, result_limit: result_limit, kind: "reviews")
+    end
+
+    def scrape_photos(
+      place,
+      poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
+      timeout_ms: DEFAULT_TIMEOUT_MS,
+      result_limit: DEFAULT_RESULT_LIMIT
+    )
+      created = create_photos_job(place)
+      job_id = created["jobId"].to_s
+      wait_for_job(job_id, poll_interval_ms: poll_interval_ms, timeout_ms: timeout_ms, kind: "photos")
+      fetch_all_rows(job_id, result_limit: result_limit, kind: "photos")
+    end
+
+    private
+
+    def wait_for_job(job_id, poll_interval_ms:, timeout_ms:, kind:)
       deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + (timeout_ms / 1000.0)
       poll_s = [poll_interval_ms, 100].max / 1000.0
 
       loop do
-        job = get_job(job_id)
+        job = case kind
+              when "reviews" then get_reviews_job(job_id)
+              when "photos" then get_photos_job(job_id)
+              else get_job(job_id)
+              end
         status = job["status"].to_s.downcase
         if TERMINAL_STATUSES.include?(status)
           if status == "failed"
@@ -75,17 +144,20 @@ module GmapsScraper
         end
         sleep(poll_s)
       end
-
-      fetch_all_rows(job_id, result_limit: result_limit)
     end
 
-    private
-
-    def fetch_all_rows(job_id, result_limit:)
+    def fetch_all_rows(job_id, result_limit:, kind:)
       rows = []
       cursor = "0"
       while cursor
-        page = get_results(job_id, limit: result_limit, cursor: cursor)
+        page = case kind
+               when "reviews"
+                 get_reviews_results(job_id, limit: result_limit, cursor: cursor)
+               when "photos"
+                 get_photos_results(job_id, limit: result_limit, cursor: cursor)
+               else
+                 get_results(job_id, limit: result_limit, cursor: cursor)
+               end
         rows.concat(Array(page["rows"]))
         next_cursor = page["nextCursor"]
         cursor = next_cursor.nil? || next_cursor == "" ? nil : next_cursor.to_s
